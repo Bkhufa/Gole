@@ -78,7 +78,6 @@ app.use((err, req, res, next) => {
 
 // function handleEvent(event) {
 function handleEvent(event) {
-
     // var event = request.body.events[0];
     console.log(event);
     var userId = event.source.userId; 
@@ -90,7 +89,7 @@ function handleEvent(event) {
     var answer;
   
     if (event.type === "join"){
-      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your shit.\n\nI will answer you if you ask a question ending with _?\nex: Yo mama_?'
+      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your shit.\n\nI will answer you if you ask a question ending with _?\ntry: Yo mama_?'
       const message = {
           type: 'text',
           text: answer
@@ -142,6 +141,8 @@ function handleEvent(event) {
               else if (searchResult.Results){
                   answer += JSON.stringify(searchResult.Results);
               }
+              
+              answer = answer.replace(/\[]/g, '');
 
               const message = {
                   type: 'text',
@@ -178,4 +179,15 @@ function writeChatHistory(replyToken, userId, userQuestion, timestamp, searchRes
     //     "message": userText,
     //     "timestamp": timestamp
     // });
+}
+
+function writeGroupJoin() {
+    timestamp = timestamp.toString();
+
+    database.ref('group-list/' + userQuestion).set({
+        userId: userId,
+        timestamp: timestamp,
+        replyToken: replyToken,
+        answer: searchResult
+    });
 }
