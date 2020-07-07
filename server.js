@@ -113,24 +113,25 @@ function handleEvent(event) {
             //   })();
           
             got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
-              console.log(res.body);
               searchResult = JSON.parse(res.body);
-              console.log(typeof(searchResult))
+              console.log(searchResult)
               
               if (searchResult.AbstractText) {
                   answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
-                  if (searchResult.RelatedTopics){
-                      answer += '\n\nRelated Topics:';
-                      for (let i = 1; i <= 5; i++){
-                          answer += `\n${i}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`
-                      }
-                  }
-                  else if (searchResult.Results){
-                      answer += JSON.stringify(searchResult.Results);
-                  }
+                  
               }
               else {
-                  answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n ddg.gg/${searchQuery} \n https://www.google.com/search?q=${searchQuery}`;
+                  answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\nddg.gg/${searchQuery} \n\nhttps://www.google.com/search?q=${searchQuery}`;
+              }
+              
+              if (searchResult.RelatedTopics){
+                  answer += '\n\nRelated Topics:';
+                  for (let i = 0; i < 5; i++){
+                      answer += `\n${i}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`
+                  }
+              }
+              else if (searchResult.Results){
+                  answer += JSON.stringify(searchResult.Results);
               }
 
               const message = {
