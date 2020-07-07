@@ -45,9 +45,8 @@ app.get("/", (request, response) => {
 
 app.listen(process.env.PORT);
 setInterval(() => {
-  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 1000);
-// }, 280000);
+  got(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
 
 const config = {
   channelAccessToken: process.env.channelAccessToken,
@@ -78,7 +77,6 @@ app.use((err, req, res, next) => {
 
 // function handleEvent(event) {
 function handleEvent(event) {
-    // var event = request.body.events[0];
     console.log(event);
     var userId = event.source.userId; 
     var timestamp = event.timestamp;
@@ -88,25 +86,21 @@ function handleEvent(event) {
     const cmdSearch = '_?';
     var answer;
   
-    client.getGroupSummary(event.source.groupId).then((summary) => {
-      console.log(summary)
-    }).catch((err) => {
-        console.error(err);
-    });
-  
-    // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`).then(res => {
-    //  console.log(res); 
-    // });
-  
-//     got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
-//         headers: {
-//             'Authorization': process.env.channelAccessToken
-//         }
-//     }).then(res => {
-//         console.log(res); 
+//     client.getGroupSummary(event.source.groupId).then((summary) => {
+//       console.log(summary)
 //     }).catch((err) => {
 //         console.error(err);
 //     });
+  
+    // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
+    //     headers: {
+    //         Authorization: 'Bearer' + process.env.channelAccessToken
+    //     }
+    // }).then(res => {
+    //     console.log(res); 
+    // }).catch((err) => {
+    //     console.error(err);
+    // });
   
     if (event.type === "join"){
       
@@ -124,13 +118,9 @@ function handleEvent(event) {
             console.error(err);
       });
       
-      
-      
-      // writeGroupJoin(groupName, groupId, type, timestamp); 
+      writeGroupJoin(groupId, type, timestamp); 
     }
-  
-    
-
+      
     if (event.type === "message" && event.message.type === "text"){
         userText = event.message.text;
         if (userText.slice(-2) === cmdSearch) {
@@ -190,7 +180,6 @@ function handleEvent(event) {
             });
         }
     } 
-
     // return response.status(200).send(request.method);
   return;
 }
@@ -212,12 +201,11 @@ function writeChatHistory(replyToken, userId, userQuestion, timestamp, searchRes
     // });
 }
 
-function writeGroupJoin(groupName, groupId, type, timestamp) {
+function writeGroupJoin(groupId, type, timestamp) {
     timestamp = timestamp.toString();
 
-    database.ref('group-list/' + groupName).set({
+    database.ref('group-list/' + groupId).set({
         timestamp: timestamp,
         type: type,
-        groupId: groupId
     });
 }
