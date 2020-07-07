@@ -28,8 +28,6 @@ admin.initializeApp({
 });
 const database = admin.database();
 
-// const line = require("@line/bot-sdk");
-
 const {
   Client,
   middleware,
@@ -37,23 +35,23 @@ const {
   JSONParseError
 } = require('@line/bot-sdk');
 
-// Auto refresh every 5 mins
-app.get("/", (request, response) => {
-  console.log(Date.now() + " Ping Received");
-  response.sendStatus(200);
-});
-app.listen(process.env.PORT);
-setInterval(() => {
-  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
-
-
 const config = {
   channelAccessToken: process.env.channelAccessToken,
   channelSecret: process.env.channelSecret
 };
 
 const client = new Client(config);
+
+// Auto refresh every 5 mins
+app.get("/", (request, response) => {
+  console.log(Date.now() + " Ping Received");
+  response.sendStatus(200);
+});
+
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
 
 app.post("/callback", middleware(config), (req, res) => {
   Promise.all(req.body.events.map(handleEvent))
@@ -74,6 +72,7 @@ app.use((err, req, res, next) => {
   }
   next(err); // will throw default 500
 });
+
 
 // function handleEvent(event) {
 function handleEvent(event) {
@@ -156,9 +155,11 @@ function writeChatHistory(replyToken, userId, userQuestion, timestamp) {
     // });
 }
 
-app.listen(process.env.PORT, () => {
-  console.log(`listening on ${process.env.PORT}`);
+// listen for requests :)
+const listener = app.listen(process.env.PORT, function() {
+  console.log('Your app is listening on port ' + listener.address().port);
 });
+
 
 
 // // our default array of dreams
