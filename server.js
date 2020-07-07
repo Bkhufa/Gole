@@ -128,7 +128,7 @@ function handleEvent(event) {
             var searchQuery = userQuestion.replace(/\s+/g, '%20');
             var searchResult;
           
-            console.log(searchQuery);
+            // console.log(searchQuery);
                     
             got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
               searchResult = JSON.parse(res.body);
