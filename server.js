@@ -93,28 +93,16 @@ function handleEvent(event) {
         if (userText.slice(-2) === cmdSearch) {
             let userQuestion = userText.split(cmdSearch)[0];
 
-            writeChatHistory(replyToken, userId, userQuestion, timestamp);
-
             var searchQuery = userQuestion.replace(/\s+/g, '%20');
             var searchResult;
             var answer;
 
             console.log(searchQuery);
-          
-            // (async () => {
-            //       try {
-            //           const response = await got('https://api.duckduckgo.com/?q=Stoicism&format=json&pretty=1&no_html=1&skip_disambig=1');
-            //           console.log(response.body);
-            //           console.log(response);
-            //       } catch (error) {
-            //           console.error(error.response.body);
-            //           //=> 'Internal server error ...'
-            //       }
-            //   })();
-          
+                    
             got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
               searchResult = JSON.parse(res.body);
               console.log(searchResult)
+              writeChatHistory(replyToken, userId, userQuestion, timestamp, searchResult);
               
               if (searchResult.AbstractText) {
                   answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
@@ -126,8 +114,11 @@ function handleEvent(event) {
               
               if (searchResult.RelatedTopics){
                   answer += '\n\nRelated Topics:';
-                  for (let i = 0; i < 5; i++){
-                      answer += `\n${i}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`
+                  for (let i = 0; i < (searchResult.RelatedTopics.length <= 5) ? searchResult.RelatedTopics.length : 5; i++){
+                      console.log(answer);
+                      if (searchResult.RelatedTopics[i].Text)
+                        answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`;
+                      else if(searchResult.RelatedTopics[i].Topics)
                   }
               }
               else if (searchResult.Results){
@@ -152,13 +143,14 @@ function handleEvent(event) {
   return;
 }
 
-function writeChatHistory(replyToken, userId, userQuestion, timestamp) {
+function writeChatHistory(replyToken, userId, userQuestion, timestamp, searchResult) {
     timestamp = timestamp.toString();
 
     database.ref('search-history/' + userQuestion).set({
         userId: userId,
         timestamp: timestamp,
-        replyToken: replyToken
+        replyToken: replyToken,
+        answer: searchResult
     });
 
     // firestore.collection("chat-history").set({
