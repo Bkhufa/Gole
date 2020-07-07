@@ -120,7 +120,7 @@ function handleEvent(event) {
                         answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`;
                       else if(searchResult.RelatedTopics[i].Topics){
                         answer += `\n${i+1} ${searchResult.RelatedTopics[i].Name}`;
-                        for (let j = 0; j < (searchResult.RelatedTopics[i].Topics.length <= 2) ? searchResult.RelatedTopics[i].Topics.length : 2){
+                        for (let j = 0; j < (searchResult.RelatedTopics[i].Topics.length <= 2) ? searchResult.RelatedTopics[i].Topics.length : 2; j++){
                           answer += `\n${searchResult.RelatedTopics[i].Topics[j]}`;
                         }
                       }
