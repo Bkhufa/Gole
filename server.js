@@ -5,10 +5,19 @@ const app = express();
 
 const serviceAccount = {
   "type": process.env.PRIVATEKEYtype,
-  
+  "project_id": process.env.PRIVATEKEYproject_id,
+  "private_key_id": process.env.PRIVATEKEYprivate_key_id,
+  "private_key": process.env.PRIVATEKEYprivate_key,
+  "client_email": process.env.PRIVATEKEYclient_email,
+  "client_id": process.env.PRIVATEKEYclient_id,
+  "auth_uri": process.env.PRIVATEKEYauth_uri,
+  "token_uri": process.env.PRIVATEKEYtoken_uri,
+  "auth_provider_x509_cert_url": process.env.PRIVATEKEYauth_provider_x509_cert_url,
+  "client_x509_cert_url": process.env.PRIVATEKEYclient_x509_cert_url
 };
 
-console.log(serviceAccount);
+console.log(serviceAccount.private_key);
+console.log(process.env.PRIVATEKEYprivate_key);
 
 const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
