@@ -35,6 +35,102 @@ app.post("/callback", line.middleware(config), (req, res) => {
     });
 });
 
+// Error Handler
+app.use((err, req, res, next) => {
+  if (err instanceof SignatureValidationFailed) {
+    res.status(401).send(err.signature);
+    return;
+  } else if (err instanceof JSONParseError) {
+    res.status(400).send(err.raw);
+    return;
+  }
+  next(err); // will throw default 500
+});
+
+// function handleEvent(event) {
+function handleEvent(event) {
+
+    // var event = request.body.events[0];
+    var userId = event.source.userId; 
+    var timestamp = event.timestamp;
+    var replyToken = event.replyToken;
+
+    var userText = "";
+    const botCommand = '_?';
+
+    if (event.type === "message" && event.message.type === "text"){
+        userText = event.message.text;
+        if (userText.slice(-2) === botCommand) {
+            let userQuestion = userText.split(botCommand)[0];
+
+            writeChatHistory(replyToken, userId, userQuestion, timestamp);
+
+            var searchQuery = userQuestion.replace(/\s+/g, '%20');
+            // var searchQuery = userQuestion;
+
+            console.log(searchQuery);
+
+            searchResult = get(searchQuery);
+
+
+            console.log("searchresult", searchResult);
+
+            const searchObj = JSON.parse(searchResult);
+
+            console.log("searchobj", searchObj);
+            
+            var answer;
+
+            if (searchObj.AbstractText) {
+                answer = `${searchObj.Heading}\n${searchObj.AbstractText}\nSource: ${searchObj.AbstractURL}`;
+                if (searchObj.RelatedTopics){
+                    for (let i = 0; i < 5; i++){
+                        answer += `Related Topics:\n1. ${searchObj.RelatedTopics[i].Text} : ${searchObj.RelatedTopics[i].FirstURL}`
+                    }
+                }
+                else if (searchObj.Results){
+                    answer += JSON.stringify(searchObj.Results);
+                }
+            }
+            else {
+                answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n google.com/${searchQuery} \n ddg.gg/${searchQuery}`;
+            }
+
+            const message = {
+                type: 'text',
+                text: answer
+            };
+            
+            client.replyMessage(replyToken, message)
+                .catch((err) => {
+                    console.error(err);
+                });
+        }
+    } 
+
+    // return response.status(200).send(request.method);
+}
+
+function writeChatHistory(replyToken, userId, userQuestion, timestamp) {
+    timestamp = timestamp.toString();
+
+    database.ref('chat-history/' + userQuestion).set({
+        userId: userId,
+        timestamp: timestamp,
+        replyToken: replyToken
+    });
+
+    // firestore.collection("chat-history").set({
+    //     "userId": userId,
+    //     "message": userText,
+    //     "timestamp": timestamp
+    // });
+}
+
+app.listen(process.env.PORT, () => {
+  console.log(`listening on ${process.env.PORT}`);
+});
+
 
 // // our default array of dreams
 // const dreams = [

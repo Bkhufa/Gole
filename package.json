@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "firebase-admin": "^8.10.0",
+    "@line/bot-sdk": "^6.3.0"
   },
   "engines": {
     "node": "12.x"
