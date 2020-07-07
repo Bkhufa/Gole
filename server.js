@@ -2,6 +2,8 @@
 const http = require('http');
 const express = require("express");
 const app = express();
+const got = require('got');
+
 
 const serviceAccount = {
   "type": process.env.PRIVATEKEYtype,
@@ -84,12 +86,12 @@ function handleEvent(event) {
     var replyToken = event.replyToken;
 
     var userText = "";
-    const botCommand = '_?';
+    const cmdSearch = '_?';
 
     if (event.type === "message" && event.message.type === "text"){
         userText = event.message.text;
-        if (userText.slice(-2) === botCommand) {
-            let userQuestion = userText.split(botCommand)[0];
+        if (userText.slice(-2) === cmdSearch) {
+            let userQuestion = userText.split(cmdSearch)[0];
 
             writeChatHistory(replyToken, userId, userQuestion, timestamp);
 
@@ -97,7 +99,25 @@ function handleEvent(event) {
             // var searchQuery = userQuestion;
 
             console.log(searchQuery);
-
+          
+            // (async () => {
+            //       try {
+            //           const response = await got('https://api.duckduckgo.com/?q=Stoicism&format=json&pretty=1&no_html=1&skip_disambig=1');
+            //           console.log(response.body);
+            //           console.log(response);
+            //       } catch (error) {
+            //           console.error(error.response.body);
+            //           //=> 'Internal server error ...'
+            //       }
+            //   })();
+          
+            // got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
+            //   console.log(res.body);
+            // });
+            got(`https://ddg.gg/?q=${searchQuery}`).then(res => {
+              console.log(res.body);
+            });
+          
             // searchResult = get(searchQuery);
 
 
