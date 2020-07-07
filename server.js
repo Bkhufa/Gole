@@ -118,7 +118,12 @@ function handleEvent(event) {
                       console.log(answer);
                       if (searchResult.RelatedTopics[i].Text)
                         answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`;
-                      else if(searchResult.RelatedTopics[i].Topics)
+                      else if(searchResult.RelatedTopics[i].Topics){
+                        answer += `\n${i+1} ${searchResult.RelatedTopics[i].Name}`;
+                        for (let j = 0; j < (searchResult.RelatedTopics[i].Topics.length <= 2) ? searchResult.RelatedTopics[i].Topics.length : 2){
+                          answer += `\n${searchResult.RelatedTopics[i].Topics[j]}`;
+                        }
+                      }
                   }
               }
               else if (searchResult.Results){
