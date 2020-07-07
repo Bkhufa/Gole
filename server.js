@@ -120,9 +120,9 @@ function handleEvent(event) {
               if (searchResult.AbstractText) {
                   answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
                   if (searchResult.RelatedTopics){
-                      answer += '\nRelated Topics:\n';
-                      for (let i = 0; i < 5; i++){
-                          answer += `1. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`
+                      answer += '\n\nRelated Topics:';
+                      for (let i = 1; i <= 5; i++){
+                          answer += `\n${i}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`
                       }
                   }
                   else if (searchResult.Results){
@@ -130,7 +130,7 @@ function handleEvent(event) {
                   }
               }
               else {
-                  answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n https://www.google.com/search?q=${searchQuery} \n ddg.gg/${searchQuery}`;
+                  answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n ddg.gg/${searchQuery} \n https://www.google.com/search?q=${searchQuery}`;
               }
 
               const message = {
@@ -154,7 +154,7 @@ function handleEvent(event) {
 function writeChatHistory(replyToken, userId, userQuestion, timestamp) {
     timestamp = timestamp.toString();
 
-    database.ref('chat-history/' + userQuestion).set({
+    database.ref('search-history/' + userQuestion).set({
         userId: userId,
         timestamp: timestamp,
         replyToken: replyToken
