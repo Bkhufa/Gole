@@ -40,12 +40,12 @@ app.get("/", (request, response) => {
   console.log(Date.now() + " Ping Received");
   response.sendStatus(200);
 });
+
 app.listen(process.env.PORT);
 setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 5000);
+}, 1000);
 // }, 280000);
-
 
 const config = {
   channelAccessToken: process.env.channelAccessToken,
@@ -78,7 +78,7 @@ app.use((err, req, res, next) => {
 function handleEvent(event) {
 
     // var event = request.body.events[0];
-    console.log(event);
+    // console.log(event);
     var userId = event.source.userId; 
     var timestamp = event.timestamp;
     var replyToken = event.replyToken;
@@ -137,6 +137,7 @@ function handleEvent(event) {
     } 
 
     // return response.status(200).send(request.method);
+  return;
 }
 
 function writeChatHistory(replyToken, userId, userQuestion, timestamp) {
@@ -154,37 +155,3 @@ function writeChatHistory(replyToken, userId, userQuestion, timestamp) {
     //     "timestamp": timestamp
     // });
 }
-
-// listen for requests :)
-// const listener = app.listen(process.env.PORT, function() {
-//   console.log('Your app is listening on port ' + listener.address().port);
-// });
-
-
-
-// // our default array of dreams
-// const dreams = [
-//   "Find and count some sheep",
-//   "Climb a really tall mountain",
-//   "Wash the dishes"
-// ];
-
-// // make all the files in 'public' available
-// // https://expressjs.com/en/starter/static-files.html
-// app.use(express.static("public"));
-
-// // https://expressjs.com/en/starter/basic-routing.html
-// app.get("/", (request, response) => {
-//   response.sendFile(__dirname + "/views/index.html");
-// });
-
-// // send the default array of dreams to the webpage
-// app.get("/dreams", (request, response) => {
-//   // express helps us take JS objects and send them as JSON
-//   response.json(dreams);
-// });
-
-// // listen for requests :)
-// const listener = app.listen(process.env.PORT, () => {
-//   console.log("Your app is listening on port " + listener.address().port);
-// });
