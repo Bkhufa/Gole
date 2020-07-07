@@ -88,25 +88,25 @@ function handleEvent(event) {
     const cmdSearch = '_?';
     var answer;
   
-    // client.getGroupSummary(event.source.groupId).then((summary) => {
-    //   console.log(summary)
-    // }).catch((err) => {
-    //     console.error(err);
-    // });
+    client.getGroupSummary(event.source.groupId).then((summary) => {
+      console.log(summary)
+    }).catch((err) => {
+        console.error(err);
+    });
   
     // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`).then(res => {
     //  console.log(res); 
     // });
   
-    got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
-        headers: {
-            'Authorization': 'Bearer' + process.env.channelAccessToken
-        }
-    }).then(res => {
-        console.log(res); 
-    }).catch((err) => {
-        console.error(err);
-    });
+//     got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
+//         headers: {
+//             'Authorization': process.env.channelAccessToken
+//         }
+//     }).then(res => {
+//         console.log(res); 
+//     }).catch((err) => {
+//         console.error(err);
+//     });
   
     if (event.type === "join"){
       
