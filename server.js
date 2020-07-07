@@ -94,8 +94,18 @@ function handleEvent(event) {
     //     console.error(err);
     // });
   
-    got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`).then(res => {
-     console.log(res); 
+    // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`).then(res => {
+    //  console.log(res); 
+    // });
+  
+    got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
+        headers: {
+            'Authorization': 'Bearer' + process.env.channelAccessToken
+        }
+    }).then(res => {
+        console.log(res); 
+    }).catch((err) => {
+        console.error(err);
     });
   
     if (event.type === "join"){
