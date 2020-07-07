@@ -80,23 +80,35 @@ app.use((err, req, res, next) => {
 function handleEvent(event) {
 
     // var event = request.body.events[0];
-    // console.log(event);
+    console.log(event);
     var userId = event.source.userId; 
     var timestamp = event.timestamp;
     var replyToken = event.replyToken;
 
     var userText = "";
     const cmdSearch = '_?';
+    var answer;
+  
+    if (event.type === "join"){
+      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your shit.\n\nI will answer you if you ask a question ending with _?\nex: Yo mama_?'
+      const message = {
+          type: 'text',
+          text: answer
+      };
+      
+      client.replyMessage(replyToken, message)
+        .catch((err) => {
+            console.error(err);
+      });
+    }
 
     if (event.type === "message" && event.message.type === "text"){
         userText = event.message.text;
         if (userText.slice(-2) === cmdSearch) {
             let userQuestion = userText.split(cmdSearch)[0];
-
             var searchQuery = userQuestion.replace(/\s+/g, '%20');
             var searchResult;
-            var answer;
-
+          
             console.log(searchQuery);
                     
             got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
@@ -112,12 +124,12 @@ function handleEvent(event) {
                   answer = `Sorry we can't find the meaning of that, do it yourself you lazy unwanted garbage, here is the link: \n\nddg.gg/${searchQuery} \nor\nhttps://www.google.com/search?q=${searchQuery}`;
               }
               
-              console.log(searchQuery);
+              // console.log(searchQuery);
               
               if (searchResult.RelatedTopics.length != 0){
                   answer += '\n\nRelated Topics:';
                   let relatedTopicsCount = (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4;
-                  console.log(relatedTopicsCount);
+                  // console.log(relatedTopicsCount);
                   for (let i = 0; i <= relatedTopicsCount; i++){
                       // console.log(i, answer);
                       if (!searchResult.RelatedTopics[i].Text){
@@ -137,9 +149,9 @@ function handleEvent(event) {
               };
 
               client.replyMessage(replyToken, message)
-                  .catch((err) => {
-                      console.error(err);
-                  });
+                .catch((err) => {
+                    console.error(err);
+              });
             }).catch((error) => {
                 console.log(error);
                 return;
