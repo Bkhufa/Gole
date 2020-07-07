@@ -96,7 +96,8 @@ function handleEvent(event) {
             writeChatHistory(replyToken, userId, userQuestion, timestamp);
 
             var searchQuery = userQuestion.replace(/\s+/g, '%20');
-            // var searchQuery = userQuestion;
+            var searchResult;
+            var answer;
 
             console.log(searchQuery);
           
@@ -111,48 +112,38 @@ function handleEvent(event) {
             //       }
             //   })();
           
-            // got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
-            //   console.log(res.body);
-            // });
-            got(`https://ddg.gg/?q=${searchQuery}`).then(res => {
+            got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
               console.log(res.body);
+              searchResult = JSON.parse(res.body);
+              console.log(typeof(searchResult))
+              
+              if (searchResult.AbstractText) {
+                  answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
+                  if (searchResult.RelatedTopics){
+                      answer += '\nRelated Topics:\n';
+                      for (let i = 0; i < 5; i++){
+                          answer += `1. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`
+                      }
+                  }
+                  else if (searchResult.Results){
+                      answer += JSON.stringify(searchResult.Results);
+                  }
+              }
+              else {
+                  answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n https://www.google.com/search?q=${searchQuery} \n ddg.gg/${searchQuery}`;
+              }
+
+              const message = {
+                  type: 'text',
+                  text: answer
+              };
+
+              client.replyMessage(replyToken, message)
+                  .catch((err) => {
+                      console.error(err);
+                  });
             });
-          
-            // searchResult = get(searchQuery);
-
-
-            // console.log("searchresult", searchResult);
-
-            // const searchObj = JSON.parse(searchResult);
-
-            // console.log("searchobj", searchObj);
             
-            var answer;
-
-            // if (searchObj.AbstractText) {
-            //     answer = `${searchObj.Heading}\n${searchObj.AbstractText}\nSource: ${searchObj.AbstractURL}`;
-            //     if (searchObj.RelatedTopics){
-            //         for (let i = 0; i < 5; i++){
-            //             answer += `Related Topics:\n1. ${searchObj.RelatedTopics[i].Text} : ${searchObj.RelatedTopics[i].FirstURL}`
-            //         }
-            //     }
-            //     else if (searchObj.Results){
-            //         answer += JSON.stringify(searchObj.Results);
-            //     }
-            // }
-            // else {
-                answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n https://www.google.com/search?q=${searchQuery} \n ddg.gg/${searchQuery}`;
-            // }
-
-            const message = {
-                type: 'text',
-                text: answer
-            };
-            
-            client.replyMessage(replyToken, message)
-                .catch((err) => {
-                    console.error(err);
-                });
         }
     } 
 
