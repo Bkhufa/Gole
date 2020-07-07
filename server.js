@@ -7,7 +7,14 @@ const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
 const database = admin.database();
 
-const line = require("@line/bot-sdk");
+// const line = require("@line/bot-sdk");
+
+const {
+  Client,
+  middleware,
+  SignatureValidationFailed,
+  JSONParseError
+} = require('@line/bot-sdk');
 
 // Auto refresh every 5 mins
 app.get("/", (request, response) => {
@@ -25,9 +32,9 @@ const config = {
   channelSecret: process.env.channelSecret
 };
 
-const client = new line.Client(config);
+const client = new Client(config);
 
-app.post("/callback", line.middleware(config), (req, res) => {
+app.post("/callback", middleware(config), (req, res) => {
   Promise.all(req.body.events.map(handleEvent))
     .then(result => res.json(result))
     .catch(e => {
@@ -51,6 +58,7 @@ app.use((err, req, res, next) => {
 function handleEvent(event) {
 
     // var event = request.body.events[0];
+    console.log(event);
     var userId = event.source.userId; 
     var timestamp = event.timestamp;
     var replyToken = event.replyToken;
@@ -70,31 +78,31 @@ function handleEvent(event) {
 
             console.log(searchQuery);
 
-            searchResult = get(searchQuery);
+            // searchResult = get(searchQuery);
 
 
-            console.log("searchresult", searchResult);
+            // console.log("searchresult", searchResult);
 
-            const searchObj = JSON.parse(searchResult);
+            // const searchObj = JSON.parse(searchResult);
 
-            console.log("searchobj", searchObj);
+            // console.log("searchobj", searchObj);
             
             var answer;
 
-            if (searchObj.AbstractText) {
-                answer = `${searchObj.Heading}\n${searchObj.AbstractText}\nSource: ${searchObj.AbstractURL}`;
-                if (searchObj.RelatedTopics){
-                    for (let i = 0; i < 5; i++){
-                        answer += `Related Topics:\n1. ${searchObj.RelatedTopics[i].Text} : ${searchObj.RelatedTopics[i].FirstURL}`
-                    }
-                }
-                else if (searchObj.Results){
-                    answer += JSON.stringify(searchObj.Results);
-                }
-            }
-            else {
+            // if (searchObj.AbstractText) {
+            //     answer = `${searchObj.Heading}\n${searchObj.AbstractText}\nSource: ${searchObj.AbstractURL}`;
+            //     if (searchObj.RelatedTopics){
+            //         for (let i = 0; i < 5; i++){
+            //             answer += `Related Topics:\n1. ${searchObj.RelatedTopics[i].Text} : ${searchObj.RelatedTopics[i].FirstURL}`
+            //         }
+            //     }
+            //     else if (searchObj.Results){
+            //         answer += JSON.stringify(searchObj.Results);
+            //     }
+            // }
+            // else {
                 answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n google.com/${searchQuery} \n ddg.gg/${searchQuery}`;
-            }
+            // }
 
             const message = {
                 type: 'text',
