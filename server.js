@@ -88,7 +88,17 @@ function handleEvent(event) {
     const cmdSearch = '_?';
     var answer;
   
+    client.getGroupSummary(event.source.groupId).then((summary) => {
+      console.log(summary)
+    }).catch((err) => {
+        console.error(err);
+    });
+  
     if (event.type === "join"){
+      
+      const groupId = event.source.groupId;
+      const type = event.source.type;
+            
       answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your shit.\n\nI will answer you if you ask a question ending with _?\ntry: Yo mama_?'
       const message = {
           type: 'text',
@@ -99,7 +109,13 @@ function handleEvent(event) {
         .catch((err) => {
             console.error(err);
       });
+      
+      
+      
+      // writeGroupJoin(groupName, groupId, type, timestamp); 
     }
+  
+    
 
     if (event.type === "message" && event.message.type === "text"){
         userText = event.message.text;
@@ -112,7 +128,8 @@ function handleEvent(event) {
                     
             got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
               searchResult = JSON.parse(res.body);
-              console.log(searchResult)
+              // console.log(searchResult)
+              
               writeChatHistory(replyToken, userId, userQuestion, timestamp, searchResult);
               
               if (searchResult.AbstractText) {
@@ -181,13 +198,12 @@ function writeChatHistory(replyToken, userId, userQuestion, timestamp, searchRes
     // });
 }
 
-function writeGroupJoin() {
+function writeGroupJoin(groupName, groupId, type, timestamp) {
     timestamp = timestamp.toString();
 
-    database.ref('group-list/' + userQuestion).set({
-        userId: userId,
+    database.ref('group-list/' + groupName).set({
         timestamp: timestamp,
-        replyToken: replyToken,
-        answer: searchResult
+        type: type,
+        groupId: groupId
     });
 }
