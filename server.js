@@ -121,7 +121,7 @@ function handleEvent(event) {
             //     }
             // }
             // else {
-                answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n google.com/${searchQuery} \n ddg.gg/${searchQuery}`;
+                answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\n https://www.google.com/search?q=${searchQuery} \n ddg.gg/${searchQuery}`;
             // }
 
             const message = {
