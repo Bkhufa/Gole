@@ -3,8 +3,20 @@ const http = require('http');
 const express = require("express");
 const app = express();
 
+const serviceAccount = {
+  "type": process.env.PRIVATEKEYtype,
+  
+};
+
+console.log(serviceAccount);
+
 const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
+admin.initializeApp({
+  // credential: admin.credential.applicationDefault(),
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: process.env.DATABASE_URL
+});
 const database = admin.database();
 
 // const line = require("@line/bot-sdk");
