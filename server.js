@@ -114,16 +114,13 @@ function handleEvent(event) {
               
               if (searchResult.RelatedTopics){
                   answer += '\n\nRelated Topics:';
-                  for (let i = 0; i < (searchResult.RelatedTopics.length <= 5) ? searchResult.RelatedTopics.length : 5; i++){
+                  for (let i = 0; i < (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4; i++){
                       console.log(answer);
-                      if (searchResult.RelatedTopics[i].Text)
+                      if (searchResult.RelatedTopics[i].Text){
                         answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`;
-                      else if(searchResult.RelatedTopics[i].Topics){
-                        answer += `\n${i+1} ${searchResult.RelatedTopics[i].Name}`;
-                        for (let j = 0; j < (searchResult.RelatedTopics[i].Topics.length <= 2) ? searchResult.RelatedTopics[i].Topics.length : 2; j++){
-                          answer += `\n${searchResult.RelatedTopics[i].Topics[j]}`;
-                        }
                       }
+                      else 
+                        break;
                   }
               }
               else if (searchResult.Results){
@@ -139,8 +136,10 @@ function handleEvent(event) {
                   .catch((err) => {
                       console.error(err);
                   });
+            }).catch((error) => {
+                console.log(error);
+                return;
             });
-            
         }
     } 
 
