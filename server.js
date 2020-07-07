@@ -16,8 +16,8 @@ const serviceAccount = {
   "client_x509_cert_url": process.env.PRIVATEKEYclient_x509_cert_url
 };
 
-console.log(serviceAccount.private_key);
-console.log(process.env.PRIVATEKEYprivate_key);
+// console.log(serviceAccount);
+// console.log(process.env.PRIVATEKEYprivate_key);
 
 const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
