@@ -112,15 +112,15 @@ function handleEvent(event) {
                   answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\nddg.gg/${searchQuery} \n\nhttps://www.google.com/search?q=${searchQuery}`;
               }
               
-              if (searchResult.RelatedTopics){
+              if (searchResult.RelatedTopics.length >= 0){
                   answer += '\n\nRelated Topics:';
-                  for (let i = 0; i < (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4; i++){
-                      console.log(answer);
-                      if (searchResult.RelatedTopics[i].Text){
-                        answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`;
+                  for (let i = 0; i <= (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4; i++){
+                      console.log(i);
+                      if (!searchResult.RelatedTopics[i].Text){
+                        break
                       }
                       else 
-                        break;
+                        answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`;
                   }
               }
               else if (searchResult.Results){
