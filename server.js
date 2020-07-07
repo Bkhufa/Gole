@@ -17,16 +17,16 @@ const serviceAccount = {
 };
 
 // console.log(serviceAccount);
-// console.log(process.env.PRIVATEKEYprivate_key);
 
 const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
 admin.initializeApp({
-  // credential: admin.credential.applicationDefault(),
   credential: admin.credential.cert(serviceAccount),
   databaseURL: process.env.DATABASE_URL
 });
 const database = admin.database();
+
+// const line = require("@line/bot-sdk");
 
 const {
   Client,
@@ -35,23 +35,24 @@ const {
   JSONParseError
 } = require('@line/bot-sdk');
 
+// Auto refresh every 5 mins
+app.get("/", (request, response) => {
+  console.log(Date.now() + " Ping Received");
+  response.sendStatus(200);
+});
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 5000);
+// }, 280000);
+
+
 const config = {
   channelAccessToken: process.env.channelAccessToken,
   channelSecret: process.env.channelSecret
 };
 
 const client = new Client(config);
-
-// Auto refresh every 5 mins
-app.get("/", (request, response) => {
-  console.log(Date.now() + " Ping Received");
-  response.sendStatus(200);
-});
-
-app.listen(process.env.PORT);
-setInterval(() => {
-  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
 
 app.post("/callback", middleware(config), (req, res) => {
   Promise.all(req.body.events.map(handleEvent))
@@ -72,7 +73,6 @@ app.use((err, req, res, next) => {
   }
   next(err); // will throw default 500
 });
-
 
 // function handleEvent(event) {
 function handleEvent(event) {
@@ -156,9 +156,9 @@ function writeChatHistory(replyToken, userId, userQuestion, timestamp) {
 }
 
 // listen for requests :)
-const listener = app.listen(process.env.PORT, function() {
-  console.log('Your app is listening on port ' + listener.address().port);
-});
+// const listener = app.listen(process.env.PORT, function() {
+//   console.log('Your app is listening on port ' + listener.address().port);
+// });
 
 
 
