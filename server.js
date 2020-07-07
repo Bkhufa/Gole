@@ -109,13 +109,15 @@ function handleEvent(event) {
                   
               }
               else {
-                  answer = `Sorry we can't find that, do it yourself you lazy unwanted garbage, here is the link: \n\nddg.gg/${searchQuery} \n\nhttps://www.google.com/search?q=${searchQuery}`;
+                  answer = `Sorry we can't find the meaning of that, do it yourself you lazy unwanted garbage, here is the link: \n\nddg.gg/${searchQuery} \nor\nhttps://www.google.com/search?q=${searchQuery}`;
               }
               
-              if (searchResult.RelatedTopics.length >= 0){
+              if (searchResult.RelatedTopics.length != 0){
                   answer += '\n\nRelated Topics:';
-                  for (let i = 0; i <= (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4; i++){
-                      console.log(i);
+                  let relatedTopicsCount = (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4;
+                  console.log(relatedTopicsCount);
+                  for (let i = 0; i <= relatedTopicsCount; i++){
+                      // console.log(i, answer);
                       if (!searchResult.RelatedTopics[i].Text){
                         break
                       }
