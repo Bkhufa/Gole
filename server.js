@@ -3,8 +3,11 @@ const http = require('http');
 const express = require("express");
 const app = express();
 
-const line = require("@line/bot-sdk");
+const admin = require("firebase-admin");
+// admin.initializeApp(functions.config().firebase)
+const database = admin.database();
 
+const line = require("@line/bot-sdk");
 
 // Auto refresh every 5 mins
 app.get("/", (request, response) => {
@@ -16,6 +19,21 @@ setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
 }, 280000);
 
+
+const config = {
+  channelAccessToken: process.env.channelAccessToken,
+  channelSecret: process.env.channelSecret
+};
+
+const client = new line.Client(config);
+
+app.post("/callback", line.middleware(config), (req, res) => {
+  Promise.all(req.body.events.map(handleEvent))
+    .then(result => res.json(result))
+    .catch(e => {
+      console.log(e);
+    });
+});
 
 
 // // our default array of dreams
