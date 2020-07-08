@@ -156,7 +156,7 @@ function handleEvent(event) {
                         break
                       }
                       else 
-                        answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text} : ${searchResult.RelatedTopics[i].FirstURL}`;
+                        answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text}\n${searchResult.RelatedTopics[i].FirstURL}`;
                   }
               }
               else if (searchResult.Results){
