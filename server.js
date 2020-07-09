@@ -151,8 +151,8 @@ function handleEvent(event) {
                   let relatedTopicsCount = (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4;
                   // console.log(relatedTopicsCount);
                   for (let i = 0; i <= relatedTopicsCount; i++){
-                      // console.log(i, answer);
-                      if (!searchResult.RelatedTopics[i].Text){
+                      console.log(i, answer);
+                      if (searchResult.RelatedTopics[i].Text in searchResult){
                         break
                       }
                       else 
