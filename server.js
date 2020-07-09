@@ -144,15 +144,15 @@ function handleEvent(event) {
                   answer = `Sorry we can't find the meaning of that, do it yourself you lazy unwanted garbage, here is the link: \n\nddg.gg/${searchQuery} \nor\nhttps://www.google.com/search?q=${searchQuery}`;
               }
               
-              // console.log(searchQuery);
+              // console.log(searchResult);
               
               if (searchResult.RelatedTopics.length != 0){
                   answer += '\n\nRelated Topics:';
                   let relatedTopicsCount = (searchResult.RelatedTopics.length < 4) ? searchResult.RelatedTopics.length : 4;
-                  // console.log(relatedTopicsCount);
+                  console.log(relatedTopicsCount);
                   for (let i = 0; i <= relatedTopicsCount; i++){
                       console.log(i, answer);
-                      if (searchResult.RelatedTopics[i].Text in searchResult){
+                      if (!('Text' in searchResult.RelatedTopics[i])){
                         break
                       }
                       else 
