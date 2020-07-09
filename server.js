@@ -107,7 +107,7 @@ function handleEvent(event) {
       const groupId = event.source.groupId;
       const type = event.source.type;
             
-      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your shit.\n\nI will answer you if you ask a question ending with _?\ntry: Yo mama_?'
+      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your crap.\n\nI will answer you if you ask a question ending with _?\ntry: Yo mama_?'
       const message = {
           type: 'text',
           text: answer
