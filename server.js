@@ -107,7 +107,7 @@ function handleEvent(event) {
       const groupId = event.source.groupId;
       const type = event.source.type;
             
-      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your crap.\n\nI will answer you if you ask a question ending with _?\ntry: Yo mama_?'
+      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your crap.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?'
       const message = {
           type: 'text',
           text: answer
@@ -141,7 +141,7 @@ function handleEvent(event) {
                   
               }
               else {
-                  answer = `Sorry we can't find the meaning of that, do it yourself you lazy unwanted garbage, here is the link: \n\nddg.gg/${searchQuery} \nor\nhttps://www.google.com/search?q=${searchQuery}`;
+                  answer = `Sorry we can't find the instant answer for that, you can use this link to find it yourself: \n\nddg.gg/${searchQuery} \nor\nhttps://www.google.com/search?q=${searchQuery}`;
               }
               
               // console.log(searchResult);
