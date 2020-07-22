@@ -142,7 +142,7 @@ function handleEvent(event) {
                   
               }
               else {
-                  answer = `Sorry we can't find the instant answer for that, you can use this link to find it yourself: \n\nddg.gg/${searchQuery} \nor\nhttps://www.google.com/search?q=${searchQuery}`;
+                  answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
               }
               
               console.log(searchResult);
