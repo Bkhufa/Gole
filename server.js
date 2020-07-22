@@ -18,7 +18,7 @@ const serviceAccount = {
   "client_x509_cert_url": process.env.PRIVATEKEYclient_x509_cert_url
 };
 
-console.log(serviceAccount);
+// console.log(serviceAccount);
 
 const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
@@ -46,7 +46,8 @@ app.get("/", (request, response) => {
 app.listen(process.env.PORT);
 setInterval(() => {
   got(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 150000);
+}, 280000);
+// }, 1500);
 
 const config = {
   channelAccessToken: process.env.channelAccessToken,
