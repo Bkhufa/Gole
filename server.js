@@ -18,7 +18,7 @@ const serviceAccount = {
   "client_x509_cert_url": process.env.PRIVATEKEYclient_x509_cert_url
 };
 
-// console.log(serviceAccount);
+console.log(serviceAccount);
 
 const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
@@ -46,7 +46,7 @@ app.get("/", (request, response) => {
 app.listen(process.env.PORT);
 setInterval(() => {
   got(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
+}, 150000);
 
 const config = {
   channelAccessToken: process.env.channelAccessToken,
@@ -144,7 +144,7 @@ function handleEvent(event) {
                   answer = `Sorry we can't find the instant answer for that, you can use this link to find it yourself: \n\nddg.gg/${searchQuery} \nor\nhttps://www.google.com/search?q=${searchQuery}`;
               }
               
-              // console.log(searchResult);
+              console.log(searchResult);
               
               if (searchResult.RelatedTopics.length != 0){
                   answer += '\n\nRelated Topics:';
