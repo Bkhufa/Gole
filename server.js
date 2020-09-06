@@ -1,21 +1,21 @@
 // but feel free to use whatever libraries or frameworks you'd like through `package.json`.
-const http = require('http');
+const http = require("http");
 const express = require("express");
 const app = express();
-const got = require('got');
-
+const got = require("got");
 
 const serviceAccount = {
-  "type": process.env.PRIVATEKEYtype,
-  "project_id": process.env.PRIVATEKEYproject_id,
-  "private_key_id": process.env.PRIVATEKEYprivate_key_id,
-  "private_key": process.env.PRIVATEKEYprivate_key,
-  "client_email": process.env.PRIVATEKEYclient_email,
-  "client_id": process.env.PRIVATEKEYclient_id,
-  "auth_uri": process.env.PRIVATEKEYauth_uri,
-  "token_uri": process.env.PRIVATEKEYtoken_uri,
-  "auth_provider_x509_cert_url": process.env.PRIVATEKEYauth_provider_x509_cert_url,
-  "client_x509_cert_url": process.env.PRIVATEKEYclient_x509_cert_url
+  type: process.env.PRIVATEKEYtype,
+  project_id: process.env.PRIVATEKEYproject_id,
+  private_key_id: process.env.PRIVATEKEYprivate_key_id,
+  private_key: process.env.PRIVATEKEYprivate_key,
+  client_email: process.env.PRIVATEKEYclient_email,
+  client_id: process.env.PRIVATEKEYclient_id,
+  auth_uri: process.env.PRIVATEKEYauth_uri,
+  token_uri: process.env.PRIVATEKEYtoken_uri,
+  auth_provider_x509_cert_url:
+    process.env.PRIVATEKEYauth_provider_x509_cert_url,
+  client_x509_cert_url: process.env.PRIVATEKEYclient_x509_cert_url
 };
 
 // console.log(serviceAccount);
@@ -35,7 +35,7 @@ const {
   middleware,
   SignatureValidationFailed,
   JSONParseError
-} = require('@line/bot-sdk');
+} = require("@line/bot-sdk");
 
 // Auto refresh every 5 mins
 app.get("/", (request, response) => {
@@ -46,7 +46,7 @@ app.get("/", (request, response) => {
 app.listen(process.env.PORT);
 setInterval(() => {
   got(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
+}, 250000);
 // }, 1500);
 
 const config = {
@@ -78,135 +78,150 @@ app.use((err, req, res, next) => {
 
 // function handleEvent(event) {
 function handleEvent(event) {
-    console.log(event);
-    var userId = event.source.userId; 
-    var timestamp = event.timestamp;
-    var replyToken = event.replyToken;
+  console.log(event);
+  var userId = event.source.userId;
+  var timestamp = event.timestamp;
+  var replyToken = event.replyToken;
 
-    var userText = "";
-    const cmdSearch = '_?';
-    var answer;
-  
-//     client.getGroupSummary(event.source.groupId).then((summary) => {
-//       console.log(summary)
-//     }).catch((err) => {
-//         console.error(err);
-//     });
-  
-    // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
-    //     headers: {
-    //         Authorization: 'Bearer' + process.env.channelAccessToken
-    //     }
-    // }).then(res => {
-    //     console.log(res); 
-    // }).catch((err) => {
-    //     console.error(err);
-    // });
-  
-    if (event.type === "join"){
-      
-      const groupId = event.source.groupId;
-      const type = event.source.type;
-            
-      answer = 'Thanks for inviting me... bitch you should be the one thanking me for looking up on your crap.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?'
-      const message = {
-          type: 'text',
-          text: answer
-      };
-      
-      client.replyMessage(replyToken, message)
-        .catch((err) => {
+  var userText = "";
+  const cmdSearch = "_?";
+  var answer;
+
+  //     client.getGroupSummary(event.source.groupId).then((summary) => {
+  //       console.log(summary)
+  //     }).catch((err) => {
+  //         console.error(err);
+  //     });
+
+  // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
+  //     headers: {
+  //         Authorization: 'Bearer' + process.env.channelAccessToken
+  //     }
+  // }).then(res => {
+  //     console.log(res);
+  // }).catch((err) => {
+  //     console.error(err);
+  // });
+
+  if (event.type === "join") {
+    const groupId = event.source.groupId;
+    const type = event.source.type;
+
+    answer =
+      "Thanks for inviting me... bitch you should be the one thanking me for looking up on your crap.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?";
+    const message = {
+      type: "text",
+      text: answer
+    };
+
+    client.replyMessage(replyToken, message).catch(err => {
+      console.error(err);
+    });
+
+    writeGroupJoin(groupId, type, timestamp);
+  }
+
+  if (event.type === "message" && event.message.type === "text") {
+    userText = event.message.text;
+    if (userText.slice(-2) === cmdSearch) {
+      let userQuestion = userText.split(cmdSearch)[0];
+      var searchQuery = userQuestion.replace(/\s+/g, "%20");
+      var searchResult;
+
+      // console.log(searchQuery);
+
+      got(
+        `https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`
+      )
+        .then(res => {
+          searchResult = JSON.parse(res.body);
+          // console.log(searchResult)
+
+          writeChatHistory(
+            replyToken,
+            userId,
+            userQuestion,
+            timestamp,
+            searchResult
+          );
+
+          if (searchResult.AbstractText) {
+            answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
+          } else {
+            answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
+          }
+
+          console.log(searchResult);
+
+          if (searchResult.RelatedTopics.length != 0) {
+            answer += "\n\nRelated Topics:";
+            let relatedTopicsCount =
+              searchResult.RelatedTopics.length > 4
+                ? 4
+                : searchResult.RelatedTopics.length - 1;
+            console.log("relatedTopicsCount", relatedTopicsCount);
+            for (let i = 0; i <= relatedTopicsCount; i++) {
+              // console.log(i, answer);
+              if (!("Text" in searchResult.RelatedTopics[i])) {
+                break;
+              } else
+                answer += `\n${i + 1}. ${searchResult.RelatedTopics[i].Text}\n${
+                  searchResult.RelatedTopics[i].FirstURL
+                }`;
+            }
+          } else if (searchResult.Results) {
+            answer += JSON.stringify(searchResult.Results);
+          }
+
+          answer = answer.replace(/\[]/g, "");
+
+          const message = {
+            type: "text",
+            text: answer
+          };
+
+          client.replyMessage(replyToken, message).catch(err => {
             console.error(err);
-      });
-      
-      writeGroupJoin(groupId, type, timestamp); 
+          });
+        })
+        .catch(error => {
+          console.log(error);
+          return;
+        });
     }
-      
-    if (event.type === "message" && event.message.type === "text"){
-        userText = event.message.text;
-        if (userText.slice(-2) === cmdSearch) {
-            let userQuestion = userText.split(cmdSearch)[0];
-            var searchQuery = userQuestion.replace(/\s+/g, '%20');
-            var searchResult;
-          
-            // console.log(searchQuery);
-                    
-            got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`).then(res => {
-              searchResult = JSON.parse(res.body);
-              // console.log(searchResult)
-              
-              writeChatHistory(replyToken, userId, userQuestion, timestamp, searchResult);
-              
-              if (searchResult.AbstractText) {
-                  answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
-                  
-              }
-              else {
-                  answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
-              }
-              
-              console.log(searchResult);
-              
-              if (searchResult.RelatedTopics.length != 0){
-                  answer += '\n\nRelated Topics:';
-                  let relatedTopicsCount = (searchResult.RelatedTopics.length > 4) ? 4 : searchResult.RelatedTopics.length-1;
-                  console.log('relatedTopicsCount', relatedTopicsCount);
-                  for (let i = 0; i <= relatedTopicsCount; i++){
-                      // console.log(i, answer);
-                      if (!('Text' in searchResult.RelatedTopics[i])){
-                        break
-                      }
-                      else 
-                        answer += `\n${i+1}. ${searchResult.RelatedTopics[i].Text}\n${searchResult.RelatedTopics[i].FirstURL}`;
-                  }
-              }
-              else if (searchResult.Results){
-                  answer += JSON.stringify(searchResult.Results);
-              }
-              
-              answer = answer.replace(/\[]/g, '');
-
-              const message = {
-                  type: 'text',
-                  text: answer
-              };
-
-              client.replyMessage(replyToken, message)
-                .catch((err) => {
-                    console.error(err);
-              });
-            }).catch((error) => {
-                console.log(error);
-                return;
-            });
-        }
-    } 
-    // return response.status(200).send(request.method);
+  }
+  // return response.status(200).send(request.method);
   return;
 }
 
-function writeChatHistory(replyToken, userId, userQuestion, timestamp, searchResult) {
-    timestamp = timestamp.toString();
+function writeChatHistory(
+  replyToken,
+  userId,
+  userQuestion,
+  timestamp,
+  searchResult
+) {
+  timestamp = timestamp.toString();
 
-    database.ref('search-history/' + userQuestion).set({
-        userId: userId,
-        timestamp: timestamp,
-        replyToken: replyToken,
-        answer: searchResult
-    });
+  database.ref("search-history/" + userQuestion).set({
+    userId: userId,
+    timestamp: timestamp,
+    replyToken: replyToken,
+    answer: searchResult
+  });
 
-    // firestore.collection("chat-history").set({
-    //     "userId": userId,
-    //     "message": userText,
-    //     "timestamp": timestamp
-    // });
+  // firestore.collection("chat-history").set({
+  //     "userId": userId,
+  //     "message": userText,
+  //     "timestamp": timestamp
+  // });
 }
 
 function writeGroupJoin(groupId, type, timestamp) {
-    timestamp = timestamp.toString();
+  timestamp = timestamp.toString();
 
-    database.ref('group-list/' + groupId).set({
-        timestamp: timestamp,
-        type: type,
-    });
+  database.ref("group-list/" + groupId).set({
+    timestamp: timestamp,
+    type: type
+  });
 }
