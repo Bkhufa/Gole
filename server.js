@@ -148,7 +148,7 @@ function handleEvent(event) {
           if (searchResult.AbstractText) {
             answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
           } else {
-            answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
+            answer = `AAAAAAAAAAAAAAAAAAAASorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
           }
 
           console.log(searchResult);
