@@ -13,8 +13,7 @@ const serviceAccount = {
   client_id: process.env.PRIVATEKEYclient_id,
   auth_uri: process.env.PRIVATEKEYauth_uri,
   token_uri: process.env.PRIVATEKEYtoken_uri,
-  auth_provider_x509_cert_url:
-    process.env.PRIVATEKEYauth_provider_x509_cert_url,
+  auth_provider_x509_cert_url: process.env.PRIVATEKEYauth_provider_x509_cert_url,
   client_x509_cert_url: process.env.PRIVATEKEYclient_x509_cert_url
 };
 
@@ -86,22 +85,6 @@ function handleEvent(event) {
   const cmdSearch = "_?";
   var answer;
 
-  //     client.getGroupSummary(event.source.groupId).then((summary) => {
-  //       console.log(summary)
-  //     }).catch((err) => {
-  //         console.error(err);
-  //     });
-
-  // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
-  //     headers: {
-  //         Authorization: 'Bearer' + process.env.channelAccessToken
-  //     }
-  // }).then(res => {
-  //     console.log(res);
-  // }).catch((err) => {
-  //     console.error(err);
-  // });
-
   if (event.type === "join") {
     const groupId = event.source.groupId;
     const type = event.source.type;
@@ -137,9 +120,7 @@ function handleEvent(event) {
 
       // console.log(searchQuery);
 
-      got(
-        `https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`
-      )
+      got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
         .then(res => {
           searchResult = JSON.parse(res.body);
           // console.log(searchResult)
@@ -155,7 +136,7 @@ function handleEvent(event) {
           if (searchResult.AbstractText) {
             answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
           } else {
-            answer = `AAAAAAAAAAAAAAAAAAAASorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
+            answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
           }
 
           console.log(searchResult);
