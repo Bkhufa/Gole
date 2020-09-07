@@ -73,8 +73,8 @@ const bannedWords = ["kudet", "qdet"];
 const remminder = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "Kamu lebih baik diam"];
 const annoyance = [
   { chance: 15, type: "Kamu kapan tobat?" },
-  { chance: 15,  type: "Hilih" },
-  { chance: 15,  type: "Anjayy" },
+  { chance: 15, type: "Hilih" },
+  { chance: 15, type: "Anjayy" },
   { chance: 15, type: "Iyain aja dah, umur gada yg tau" },
   { chance: 10, type: "Yaudah iya" },
   { chance: 10, type: "Ah suka sok tau gitu" },
