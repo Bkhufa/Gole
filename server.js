@@ -76,7 +76,6 @@ app.use((err, req, res, next) => {
   next(err); // will throw default 500
 });
 
-// function handleEvent(event) {
 function handleEvent(event) {
   console.log(event);
   var userId = event.source.userId;
@@ -108,7 +107,7 @@ function handleEvent(event) {
     const type = event.source.type;
 
     answer =
-      "Thanks for inviting me... bitch you should be the one thanking me for looking up on your crap.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?";
+      "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?";
     const message = {
       type: "text",
       text: answer
@@ -123,6 +122,14 @@ function handleEvent(event) {
 
   if (event.type === "message" && event.message.type === "text") {
     userText = event.message.text;
+    
+    const bannedWords = ["kudet", "qdet"];
+    const misuh = ["Mon maap itu tida sopan hehe"];
+    
+    if (contains(userText.toLowerCase(), bannedWords)) {
+      randomRude(replyToken, misuh);
+    }
+    
     if (userText.slice(-2) === cmdSearch) {
       let userQuestion = userText.split(cmdSearch)[0];
       var searchQuery = userQuestion.replace(/\s+/g, "%20");
@@ -174,15 +181,8 @@ function handleEvent(event) {
           }
 
           answer = answer.replace(/\[]/g, "");
-
-          const message = {
-            type: "text",
-            text: answer
-          };
-
-          client.replyMessage(replyToken, message).catch(err => {
-            console.error(err);
-          });
+        
+          reply(replyToken, answer);
         })
         .catch(error => {
           console.log(error);
@@ -192,6 +192,17 @@ function handleEvent(event) {
   }
   // return response.status(200).send(request.method);
   return;
+}
+
+function reply(replyToken, replyText) {
+  const message = {
+    type: "text",
+    text: replyText
+  };
+
+  client.replyMessage(replyToken, message).catch(err => {
+    console.error(err);
+  });
 }
 
 function writeChatHistory(
@@ -224,4 +235,18 @@ function writeGroupJoin(groupId, type, timestamp) {
     timestamp: timestamp,
     type: type
   });
+}
+
+function contains(target, pattern){
+    var value = 0;
+    pattern.forEach(function(word){
+      value = value + target.includes(word);
+    });
+    return (value === 1)
+}
+
+function randomRude(replyToken, misuh) {
+  var randomArr = Math.floor(Math.random() * misuh.length);
+
+  reply(replyToken, misuh[randomArr]);
 }
