@@ -1,5 +1,3 @@
-// but feel free to use whatever libraries or frameworks you'd like through `package.json`.
-const http = require("http");
 const express = require("express");
 const app = express();
 const got = require("got");
@@ -17,8 +15,6 @@ const serviceAccount = {
   client_x509_cert_url: process.env.PRIVATEKEYclient_x509_cert_url
 };
 
-// console.log(serviceAccount);
-
 const admin = require("firebase-admin");
 // admin.initializeApp(functions.config().firebase)
 admin.initializeApp({
@@ -26,8 +22,6 @@ admin.initializeApp({
   databaseURL: process.env.DATABASE_URL
 });
 const database = admin.database();
-
-// const line = require("@line/bot-sdk");
 
 const {
   Client,
@@ -75,6 +69,10 @@ app.use((err, req, res, next) => {
   next(err); // will throw default 500
 });
 
+
+const bannedWords = ["kudet", "qdet"];
+const misuh = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "HEHH"];
+
 function handleEvent(event) {
   console.log(event);
   var userId = event.source.userId;
@@ -83,47 +81,31 @@ function handleEvent(event) {
 
   var userText = "";
   const cmdSearch = "_?";
-  var answer;  
+  var answer;
   const groupId = event.source.groupId;
 
   if (event.type === "join") {
     const type = event.source.type;
-
-    answer =
-      "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?";
-    const message = {
-      type: "text",
-      text: answer
-    };
-
-    client.replyMessage(replyToken, message).catch(err => {
-      console.error(err);
-    });
-
+    answer = "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?";
+    reply(replyToken, answer);
     writeGroupJoin(groupId, type, timestamp);
   }
 
   if (event.type === "message" && event.message.type === "text") {
     userText = event.message.text;
-    
-    const bannedWords = ["kudet", "qdet"];
-    const misuh = ["Mon maap itu tida sopan hehe", "Ssstt"];
-    
+
     if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0' && contains(userText.toLowerCase(), bannedWords)) {
       randomRude(replyToken, misuh);
     }
-    
+
     if (userText.slice(-2) === cmdSearch) {
       let userQuestion = userText.split(cmdSearch)[0];
       var searchQuery = userQuestion.replace(/\s+/g, "%20");
       var searchResult;
 
-      // console.log(searchQuery);
-
       got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
         .then(res => {
           searchResult = JSON.parse(res.body);
-          // console.log(searchResult)
 
           writeChatHistory(
             replyToken,
@@ -149,20 +131,19 @@ function handleEvent(event) {
                 : searchResult.RelatedTopics.length - 1;
             console.log("relatedTopicsCount", relatedTopicsCount);
             for (let i = 0; i <= relatedTopicsCount; i++) {
-              // console.log(i, answer);
               if (!("Text" in searchResult.RelatedTopics[i])) {
                 break;
               } else
                 answer += `\n${i + 1}. ${searchResult.RelatedTopics[i].Text}\n${
                   searchResult.RelatedTopics[i].FirstURL
-                }`;
+                  }`;
             }
           } else if (searchResult.Results) {
             answer += JSON.stringify(searchResult.Results);
           }
 
           answer = answer.replace(/\[]/g, "");
-        
+
           reply(replyToken, answer);
         })
         .catch(error => {
@@ -211,23 +192,21 @@ function writeChatHistory(
 
 function writeGroupJoin(groupId, type, timestamp) {
   timestamp = timestamp.toString();
-
   database.ref("group-list/" + groupId).set({
     timestamp: timestamp,
     type: type
   });
 }
 
-function contains(target, pattern){
-    var value = 0;
-    pattern.forEach(function(word){
-      value = value + target.includes(word);
-    });
-    return (value === 1)
+function contains(target, pattern) {
+  var value = 0;
+  pattern.forEach(function (word) {
+    value = value + target.includes(word);
+  });
+  return (value === 1);
 }
 
 function randomRude(replyToken, misuh) {
   var randomArr = Math.floor(Math.random() * misuh.length);
-
   reply(replyToken, misuh[randomArr]);
 }
