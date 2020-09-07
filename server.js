@@ -83,8 +83,7 @@ function handleEvent(event) {
 
   var userText = "";
   const cmdSearch = "_?";
-  var answer;
-  
+  var answer;  
   const groupId = event.source.groupId;
 
   if (event.type === "join") {
