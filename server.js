@@ -69,9 +69,30 @@ app.use((err, req, res, next) => {
   next(err); // will throw default 500
 });
 
-
 const bannedWords = ["kudet", "qdet"];
-const misuh = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "HEHH"];
+const remminder = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "Kamu lebih baik diam"];
+const annoyance = [
+  { chance: 15, type: "Kamu kapan tobat?" },
+  { chance: 15,  type: "Hilih" },
+  { chance: 15,  type: "Anjayy" },
+  { chance: 15, type: "Iyain aja dah, umur gada yg tau" },
+  { chance: 10, type: "Yaudah iya" },
+  { chance: 10, type: "Ah suka sok tau gitu" },
+  { chance: 5,  type: "Ga cape apa gitu terus? Aku aja cape" },
+  { chance: 3,  type: "Berisik ah kamu" },
+  { chance: 2,  type: "MAN ROBBUKA?!!?" },
+];
+const globalChance = 100;
+
+function ganggu() {
+  const rnd = Math.random();
+  var acc = 0;
+  for (var i = 0, r; (r = annoyance[i]); i++) {
+    acc += r.chance / 100 * globalChance / 100;
+    if (rnd < acc) return r.type + ` ${acc}\n ${rnd}`;
+  }
+  return;
+}
 
 function handleEvent(event) {
   console.log(event);
@@ -92,10 +113,17 @@ function handleEvent(event) {
   }
 
   if (event.type === "message" && event.message.type === "text") {
-    userText = event.message.text;
+    userText = event.message.text;    
 
-    if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0' && contains(userText.toLowerCase(), bannedWords)) {
-      randomRude(replyToken, misuh);
+    if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
+      const annoy = ganggu();
+
+      if (contains(userText.toLowerCase(), bannedWords))
+        randomRude(replyToken, remminder);
+
+      if(annoy) {
+        reply(replyToken, annoy);
+      }
     }
 
     if (userText.slice(-2) === cmdSearch) {
