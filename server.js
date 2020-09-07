@@ -83,10 +83,10 @@ function handleEvent(event) {
 
   var userText = "";
   const cmdSearch = "_?";
-  var answer;
+  var answer;  
+  const groupId = event.source.groupId;
 
   if (event.type === "join") {
-    const groupId = event.source.groupId;
     const type = event.source.type;
 
     answer =
@@ -107,9 +107,9 @@ function handleEvent(event) {
     userText = event.message.text;
     
     const bannedWords = ["kudet", "qdet"];
-    const misuh = ["Mon maap itu tida sopan hehe"];
+    const misuh = ["Mon maap itu tida sopan hehe", "Ssstt"];
     
-    if (contains(userText.toLowerCase(), bannedWords)) {
+    if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0' && contains(userText.toLowerCase(), bannedWords)) {
       randomRude(replyToken, misuh);
     }
     
