@@ -13,8 +13,7 @@ const serviceAccount = {
   client_id: process.env.PRIVATEKEYclient_id,
   auth_uri: process.env.PRIVATEKEYauth_uri,
   token_uri: process.env.PRIVATEKEYtoken_uri,
-  auth_provider_x509_cert_url:
-    process.env.PRIVATEKEYauth_provider_x509_cert_url,
+  auth_provider_x509_cert_url: process.env.PRIVATEKEYauth_provider_x509_cert_url,
   client_x509_cert_url: process.env.PRIVATEKEYclient_x509_cert_url
 };
 
@@ -85,25 +84,10 @@ function handleEvent(event) {
   var userText = "";
   const cmdSearch = "_?";
   var answer;
-
-  //     client.getGroupSummary(event.source.groupId).then((summary) => {
-  //       console.log(summary)
-  //     }).catch((err) => {
-  //         console.error(err);
-  //     });
-
-  // got(`https://api.line.me/v2/bot/group/${event.source.groupId}/summary`, {
-  //     headers: {
-  //         Authorization: 'Bearer' + process.env.channelAccessToken
-  //     }
-  // }).then(res => {
-  //     console.log(res);
-  // }).catch((err) => {
-  //     console.error(err);
-  // });
+  
+  const groupId = event.source.groupId;
 
   if (event.type === "join") {
-    const groupId = event.source.groupId;
     const type = event.source.type;
 
     answer =
@@ -124,9 +108,9 @@ function handleEvent(event) {
     userText = event.message.text;
     
     const bannedWords = ["kudet", "qdet"];
-    const misuh = ["Mon maap itu tida sopan hehe"];
+    const misuh = ["Mon maap itu tida sopan hehe", "Ssstt"];
     
-    if (contains(userText.toLowerCase(), bannedWords)) {
+    if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0' && contains(userText.toLowerCase(), bannedWords)) {
       randomRude(replyToken, misuh);
     }
     
@@ -137,9 +121,7 @@ function handleEvent(event) {
 
       // console.log(searchQuery);
 
-      got(
-        `https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`
-      )
+      got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
         .then(res => {
           searchResult = JSON.parse(res.body);
           // console.log(searchResult)
