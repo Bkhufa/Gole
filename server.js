@@ -77,10 +77,10 @@ const annoyance = [
   { chance: 13, type: "Gatauu" },
   { chance: 12, type: "Ohh gitu" },
   { chance: 10, type: "Yaudah iya" },
-  { chance: 9,  type: "Hilih" },
-  { chance: 9,  type: "Aku cape" },
-  { chance: 9,  type: "Berisik ah" },
-  { chance: 8,  type: "MAN ROBBUKA?!!?" },
+  { chance: 9, type: "Hilih" },
+  { chance: 9, type: "Aku cape" },
+  { chance: 9, type: "Berisik ah" },
+  { chance: 8, type: "MAN ROBBUKA?!!?" },
 ];
 const globalChance = 10 / 100;
 
@@ -106,6 +106,7 @@ function handleEvent(event) {
   var userText = "";
   var answer;
   const cmdSearch = "_?";
+  const cmdNew = ";?"
 
   if (event.type === "join") {
     const type = event.source.type;
@@ -115,12 +116,12 @@ function handleEvent(event) {
   }
 
   if (event.type === "message" && event.message.type === "text") {
-    userText = event.message.text;    
-    
+    userText = event.message.text;
+
     if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
       var rnd = Math.random();
       console.warn(rnd);
-      
+
       if (globalChance > rnd) {
         rnd = Math.random();
         const annoy = ganggu(rnd);
@@ -136,8 +137,27 @@ function handleEvent(event) {
     }
 
     if (userText.slice(-2) === cmdSearch) {
+      reply(replyToken, "Sorry we are under maintenance now");
+    }
+
+
+
+    if (userText.slice(-2) === cmdNew) {
       let userQuestion = userText.split(cmdSearch)[0];
-      getDdg(userQuestion);
+
+      (async () => {
+        const ddgResult = await getDdg(userQuestion);
+        reply(replyToken, ddgResult);
+        writeChatHistory(
+          replyToken,
+          userId,
+          userQuestion,
+          timestamp,
+          ddgResult
+        );
+      })().catch(error => {
+        return console.error(error);
+      });
     }
   }
   // return response.status(200).send(request.method);
@@ -199,22 +219,14 @@ function randomRude(replyToken, misuh) {
   reply(replyToken, misuh[randomArr]);
 }
 
-function getDdg(userQuestion) {
+async function getDdg(userQuestion) {
   var searchQuery = userQuestion.replace(/\s+/g, "%20");
   var searchResult;
 
-  got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
+  return got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
     .then(res => {
-      
+      var answer;
       searchResult = JSON.parse(res.body);
-
-      writeChatHistory(
-        replyToken,
-        userId,
-        userQuestion,
-        timestamp,
-        searchResult
-      );
 
       if (searchResult.AbstractText) {
         answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
@@ -239,12 +251,12 @@ function getDdg(userQuestion) {
       } else if (searchResult.Results) {
         answer += JSON.stringify(searchResult.Results);
       }
+
       answer = answer.replace(/\[]/g, "");
-      reply(replyToken, answer);
-      return;
+      // console.log("answer: ", answer);
+      return answer;
     })
     .catch(error => {
-      console.log(error);
-      return;
+      return console.error(error);
     });
 }
