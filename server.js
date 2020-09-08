@@ -105,12 +105,12 @@ function handleEvent(event) {
 
   var userText = "";
   var answer;
-  const cmdSearch = "_?";
-  const cmdNew = ";?"
+  const cmdOld = "_?";
+  const cmdSearch = ";?"
 
   if (event.type === "join") {
     const type = event.source.type;
-    answer = "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with _?\ntry: Elon Musk_?";
+    answer = "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with ;?\ntry: Elon Musk;?";
     reply(replyToken, answer);
     writeGroupJoin(groupId, type, timestamp);
   }
@@ -127,7 +127,7 @@ function handleEvent(event) {
         const annoy = ganggu(rnd);
         if (annoy) {
           console.log(annoy);
-          // reply(replyToken, annoy);
+          reply(replyToken, annoy);
         }
       }
 
@@ -136,24 +136,25 @@ function handleEvent(event) {
       }
     }
 
-    if (userText.slice(-2) === cmdSearch) {
-      reply(replyToken, "Sorry we are under maintenance now");
+    if (userText.slice(-2) === cmdOld) {
+      // reply(replyToken, "We are changing the command to ;?");
+      reply(replyToken, "Sorry we are currently in maintenance");
     }
 
-
-
-    if (userText.slice(-2) === cmdNew) {
+    if (userText.slice(-2) === cmdSearch) {
       let userQuestion = userText.split(cmdSearch)[0];
 
       (async () => {
-        const ddgResult = await getDdg(userQuestion);
-        reply(replyToken, ddgResult);
+        // const ddgResult = await getDdg(userQuestion);
+        const googleResult1 = await getGoogleApigeek(userQuestion);
+
+        reply(replyToken, googleResult1);
         writeChatHistory(
           replyToken,
           userId,
           userQuestion,
           timestamp,
-          ddgResult
+          googleResult1
         );
       })().catch(error => {
         return console.error(error);
@@ -220,13 +221,12 @@ function randomRude(replyToken, misuh) {
 }
 
 async function getDdg(userQuestion) {
-  var searchQuery = userQuestion.replace(/\s+/g, "%20");
-  var searchResult;
+  const searchQuery = userQuestion.replace(/\s+/g, "%20");
 
   return got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
     .then(res => {
       var answer;
-      searchResult = JSON.parse(res.body);
+      const searchResult = JSON.parse(res.body);
 
       if (searchResult.AbstractText) {
         answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
@@ -259,4 +259,22 @@ async function getDdg(userQuestion) {
     .catch(error => {
       return console.error(error);
     });
+}
+
+async function getGoogleApigeek(userQuestion) {
+  const searchQuery = userQuestion.replace(/\s+/g, "%20");
+  return got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${searchQuery}&num=5&lr=lang_en`, {
+    headers: {
+      "x-rapidapi-host" : process.env.rapidapi_host1,
+      "x-rapidapi-key"  : process.env.rapidapi_key1,
+      "useQueryString"  : true
+    }
+  }).then(res => {
+    const searchResult = JSON.parse(res.body);
+    console.log(searchResult.results);
+    
+    return searchResult.results;
+  }).catch(error => {
+    return console.error(error);
+  });
 }
