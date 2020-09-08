@@ -70,40 +70,42 @@ app.use((err, req, res, next) => {
 });
 
 const bannedWords = ["kudet", "qdet"];
-const remminder = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "Kamu lebih baik diam"];
+const reminder = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "Kamu lebih baik diam"];
 const annoyance = [
-  { chance: 15, type: "Kamu kapan tobat?" },
-  { chance: 15, type: "Hilih" },
-  { chance: 15, type: "Anjayy" },
-  { chance: 15, type: "Iyain aja dah, umur gada yg tau" },
+  { chance: 14, type: "Hilih" },
+  { chance: 13, type: "Anjayy" },
+  { chance: 12, type: "Kamu kapan tobat?" },
+  { chance: 11, type: "Iyain aja dah, umur gada yg tau" },
   { chance: 10, type: "Yaudah iya" },
   { chance: 10, type: "Ah suka sok tau gitu" },
-  { chance: 5,  type: "Ga cape apa gitu terus? Aku aja cape" },
-  { chance: 3,  type: "Berisik ah kamu" },
-  { chance: 2,  type: "MAN ROBBUKA?!!?" },
+  { chance: 10, type: "Ga cape apa gitu terus? Aku aja cape" },
+  { chance: 10, type: "Berisik ah kamu" },
+  { chance: 5,  type: "MAN ROBBUKA?!!?" },
 ];
-const globalChance = 100;
+const globalChance = 10;
 
-function ganggu() {
-  const rnd = Math.random();
+function ganggu(rnd) {
+  // const rnd = Math.random();
   var acc = 0;
   for (var i = 0, r; (r = annoyance[i]); i++) {
-    acc += r.chance / 100 * globalChance / 100;
-    if (rnd < acc) return r.type + ` ${acc}\n ${rnd}`;
+    acc += r.chance / 100;
+    console.log(acc, rnd);
+    if (rnd < acc) return r.type;
   }
+  console.warn(acc, rnd);
   return;
 }
 
 function handleEvent(event) {
-  console.log(event);
+  // console.log(event);
   var userId = event.source.userId;
   var timestamp = event.timestamp;
   var replyToken = event.replyToken;
+  const groupId = event.source.groupId;
 
   var userText = "";
-  const cmdSearch = "_?";
   var answer;
-  const groupId = event.source.groupId;
+  const cmdSearch = "_?";
 
   if (event.type === "join") {
     const type = event.source.type;
@@ -114,15 +116,20 @@ function handleEvent(event) {
 
   if (event.type === "message" && event.message.type === "text") {
     userText = event.message.text;    
-
+    
     if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
-      const annoy = ganggu();
+      const rnd = Math.random();
+      const annoy = ganggu(rnd * userText.length);
 
-      if (contains(userText.toLowerCase(), bannedWords))
-        randomRude(replyToken, remminder);
+      if (globalChance > rnd) {
+        if (annoy) {
+          console.log(annoy);
+          reply(replyToken, annoy);
+        }
+      }
 
-      if(annoy) {
-        reply(replyToken, annoy);
+      if (contains(userText.toLowerCase(), bannedWords)) {
+        randomRude(replyToken, reminder);
       }
     }
 
@@ -149,15 +156,12 @@ function handleEvent(event) {
             answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
           }
 
-          console.log(searchResult);
-
           if (searchResult.RelatedTopics.length != 0) {
             answer += "\n\nRelated Topics:";
             let relatedTopicsCount =
               searchResult.RelatedTopics.length > 4
                 ? 4
                 : searchResult.RelatedTopics.length - 1;
-            console.log("relatedTopicsCount", relatedTopicsCount);
             for (let i = 0; i <= relatedTopicsCount; i++) {
               if (!("Text" in searchResult.RelatedTopics[i])) {
                 break;
