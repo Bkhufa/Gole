@@ -72,17 +72,17 @@ app.use((err, req, res, next) => {
 const bannedWords = ["kudet", "qdet"];
 const reminder = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "Kamu lebih baik diam"];
 const annoyance = [
-  { chance: 14, type: "Hilih" },
-  { chance: 13, type: "Anjayy" },
-  { chance: 12, type: "Kamu kapan tobat?" },
-  { chance: 11, type: "Iyain aja dah, umur gada yg tau" },
+  { chance: 15, type: "Anjayy" },
+  { chance: 15, type: "Parahh" },
+  { chance: 13, type: "Gatauu" },
+  { chance: 12, type: "Ohh gitu" },
   { chance: 10, type: "Yaudah iya" },
-  { chance: 10, type: "Ah suka sok tau gitu" },
-  { chance: 10, type: "Ga cape apa gitu terus? Aku aja cape" },
-  { chance: 10, type: "Berisik ah kamu" },
-  { chance: 5,  type: "MAN ROBBUKA?!!?" },
+  { chance: 9,  type: "Hilih" },
+  { chance: 9,  type: "Aku cape" },
+  { chance: 9,  type: "Berisik ah" },
+  { chance: 8,  type: "MAN ROBBUKA?!!?" },
 ];
-const globalChance = 10;
+const globalChance = 10 / 100;
 
 function ganggu(rnd) {
   // const rnd = Math.random();
@@ -118,13 +118,15 @@ function handleEvent(event) {
     userText = event.message.text;    
     
     if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
-      const rnd = Math.random();
-      const annoy = ganggu(rnd * userText.length);
-
+      var rnd = Math.random();
+      console.warn(rnd);
+      
       if (globalChance > rnd) {
+        rnd = Math.random();
+        const annoy = ganggu(rnd);
         if (annoy) {
           console.log(annoy);
-          reply(replyToken, annoy);
+          // reply(replyToken, annoy);
         }
       }
 
@@ -135,53 +137,7 @@ function handleEvent(event) {
 
     if (userText.slice(-2) === cmdSearch) {
       let userQuestion = userText.split(cmdSearch)[0];
-      var searchQuery = userQuestion.replace(/\s+/g, "%20");
-      var searchResult;
-
-      got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
-        .then(res => {
-          searchResult = JSON.parse(res.body);
-
-          writeChatHistory(
-            replyToken,
-            userId,
-            userQuestion,
-            timestamp,
-            searchResult
-          );
-
-          if (searchResult.AbstractText) {
-            answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
-          } else {
-            answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
-          }
-
-          if (searchResult.RelatedTopics.length != 0) {
-            answer += "\n\nRelated Topics:";
-            let relatedTopicsCount =
-              searchResult.RelatedTopics.length > 4
-                ? 4
-                : searchResult.RelatedTopics.length - 1;
-            for (let i = 0; i <= relatedTopicsCount; i++) {
-              if (!("Text" in searchResult.RelatedTopics[i])) {
-                break;
-              } else
-                answer += `\n${i + 1}. ${searchResult.RelatedTopics[i].Text}\n${
-                  searchResult.RelatedTopics[i].FirstURL
-                  }`;
-            }
-          } else if (searchResult.Results) {
-            answer += JSON.stringify(searchResult.Results);
-          }
-
-          answer = answer.replace(/\[]/g, "");
-
-          reply(replyToken, answer);
-        })
-        .catch(error => {
-          console.log(error);
-          return;
-        });
+      getDdg(userQuestion);
     }
   }
   // return response.status(200).send(request.method);
@@ -241,4 +197,54 @@ function contains(target, pattern) {
 function randomRude(replyToken, misuh) {
   var randomArr = Math.floor(Math.random() * misuh.length);
   reply(replyToken, misuh[randomArr]);
+}
+
+function getDdg(userQuestion) {
+  var searchQuery = userQuestion.replace(/\s+/g, "%20");
+  var searchResult;
+
+  got(`https://api.duckduckgo.com/?q=${searchQuery}&format=json&pretty=1&no_html=1&skip_disambig=1`)
+    .then(res => {
+      
+      searchResult = JSON.parse(res.body);
+
+      writeChatHistory(
+        replyToken,
+        userId,
+        userQuestion,
+        timestamp,
+        searchResult
+      );
+
+      if (searchResult.AbstractText) {
+        answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
+      } else {
+        answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
+      }
+
+      if (searchResult.RelatedTopics.length != 0) {
+        answer += "\n\nRelated Topics:";
+        let relatedTopicsCount =
+          searchResult.RelatedTopics.length > 4
+            ? 4
+            : searchResult.RelatedTopics.length - 1;
+        for (let i = 0; i <= relatedTopicsCount; i++) {
+          if (!("Text" in searchResult.RelatedTopics[i])) {
+            break;
+          } else
+            answer += `\n${i + 1}. ${searchResult.RelatedTopics[i].Text}\n${
+              searchResult.RelatedTopics[i].FirstURL
+              }`;
+        }
+      } else if (searchResult.Results) {
+        answer += JSON.stringify(searchResult.Results);
+      }
+      answer = answer.replace(/\[]/g, "");
+      reply(replyToken, answer);
+      return;
+    })
+    .catch(error => {
+      console.log(error);
+      return;
+    });
 }
