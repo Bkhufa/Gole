@@ -318,13 +318,15 @@ async function getGoogleSerpsbot(userQuestion) {
   const hl = "en-ID"; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
   const gl = "id"; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
 
-  return got(`https://google-search5.p.rapidapi.com/google-serps/?q=${userQuestion}&gl=${gl}&hl=${hl}&num=5`, {
-    headers: {
-      "x-rapidapi-host": process.env.rapidapi_hostS,
-      "x-rapidapi-key": process.env.rapidapi_key,
-      "useQueryString": true
-    }
-  }).then(res => {
+  try {
+    const res = await got(`https://google-search5.p.rapidapi.com/google-serps/?q=${userQuestion}&gl=${gl}&hl=${hl}&num=5`, {
+      headers: {
+        "x-rapidapi-host": process.env.rapidapi_hostS,
+        "x-rapidapi-key": process.env.rapidapi_key,
+        "useQueryString": true
+      }
+    });
+
     const result = JSON.parse(res.body);
     const searchResult = result.data.results.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
 
@@ -332,12 +334,14 @@ async function getGoogleSerpsbot(userQuestion) {
       return 0;
     }
 
+    await writeSearchHistory(userQuestion, searchResult);
+    console.log("Result from Serpsbot");
     return searchResult;
 
-  }).catch(error => {
-    console.error("Serpsbot", error);
+  } catch (err) {
+    console.error("Serpsbot", err);
     return getGoogleApigeek(userQuestion);
-  });
+  }
 }
 
 async function getGoogleMarcelinhov(userQuestion) {
@@ -358,6 +362,7 @@ async function getGoogleMarcelinhov(userQuestion) {
       return 0;
     }
 
+    // await writeSearchHistory(userQuestion, searchResult);
     return searchResult;
 
   }).catch(error => {
@@ -379,6 +384,7 @@ async function getGoogleApigeek(userQuestion) {
       return 0;
     }
 
+    // await writeSearchHistory(userQuestion, searchResult.results);
     return searchResult.results;
 
   }).catch(error => {
