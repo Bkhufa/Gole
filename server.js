@@ -141,7 +141,7 @@ function handleEvent(event) {
       });
     }
 
-    if (userText.slice(-2) === cmdSearch) {
+    if (userText.slice(-2) === cmdSearch && userText.length > 2) {
       const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20").toUpperCase();
 
       (async () => {
@@ -269,7 +269,7 @@ async function getDdg(userQuestion) {
       if (searchResult.AbstractText) {
         answer = `${searchResult.Heading}\n${searchResult.AbstractText}\nSource: ${searchResult.AbstractURL}`;
       } else {
-        answer = `Sorry we can't find the instant answer for that, use this link to find it yourself: \n\nhttps://www.google.com/search?q=${searchQuery}`;
+        answer = `Sorry we can't find the instant answer for that, use this link to find it yourself:\n\n https://www.ddg.gg/q=${searchQuery}`;
       }
 
       if (searchResult.RelatedTopics.length != 0) {
@@ -301,7 +301,7 @@ async function getDdg(userQuestion) {
 
 function InterfaceAPI(response, userQuestion) {
   if (response === 0) {
-    return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${userQuestion}`;
+    return `Sorry we can't seem to find that, use this link to find it yourself:\n\nhttps://www.google.com/search?q=${userQuestion}`;
   }
   else {
     var answer = `${userQuestion.replace(/%20+/g, " ")}\n`;
