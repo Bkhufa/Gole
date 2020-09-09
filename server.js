@@ -90,7 +90,7 @@ function ganggu(rnd) {
   var acc = 0;
   for (var i = 0, r; (r = annoyance[i]); i++) {
     acc += r.chance / 100;
-    console.log(acc, rnd);
+    // console.log(acc, rnd);
     if (rnd < acc) return r.type;
   }
   console.warn(acc, rnd);
@@ -98,7 +98,7 @@ function ganggu(rnd) {
 }
 
 function handleEvent(event) {
-  // console.log(event);
+  console.log(event);
   var userId = event.source.userId;
   var timestamp = event.timestamp;
   var replyToken = event.replyToken;
@@ -111,7 +111,7 @@ function handleEvent(event) {
 
   if (event.type === "join") {
     const type = event.source.type;
-    answer = "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with ;?\ntry: Elon Musk;?";
+    answer = "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with ;?\n\ntry: Elon Musk;?";
     reply(replyToken, answer);
     writeGroupJoin(groupId, type, timestamp);
   }
@@ -141,26 +141,31 @@ function handleEvent(event) {
       });
     }
 
-    if (userText.slice(-2) === cmdSearch && userText.length > 2) {
-      const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20").toUpperCase();
+    if (userText.slice(-2) === cmdSearch) {
 
-      (async () => {
-        try {
-          // const ddgResult = await getDdg(userQuestion);
-          const googleResult = await getSearchHistory(userQuestion);
-          // const googleResult = await getGoogleMarcelinhov(userQuestion);  // Array of obj
-          // const googleResult = await getGoogleSerpsbot(userQuestion);
-          // const googleResult = await getGoogleApigeek(userQuestion);
+      if (userText.length > 2) {
+        const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20").toUpperCase();
 
-          const answer = InterfaceAPI(googleResult, userQuestion);       // String
+        (async () => {
+          try {
+            // const ddgResult = await getDdg(userQuestion);
+            const googleResult = await getSearchHistory(userQuestion);
+            // const googleResult = await getGoogleMarcelinhov(userQuestion);  // Array of obj
+            // const googleResult = await getGoogleSerpsbot(userQuestion);
+            // const googleResult = await getGoogleApigeek(userQuestion);
 
-          // await writeSearchHistory(userQuestion, googleResult);
-          reply(replyToken, answer);
+            const answer = InterfaceAPI(googleResult, userQuestion);       // String
 
-        } catch (error) {
-          return console.error("Reply Error", error);
-        }
-      })();
+            // await writeSearchHistory(userQuestion, googleResult);
+            reply(replyToken, answer);
+
+          } catch (error) {
+            return console.error("Reply Error", error);
+          }
+        })();
+      } else {
+        reply(replyToken, "GOLE adala bot yang membantu kalian mencarikan sesuatu di google supaya kalian tida perlu ganti aplikasi atau buka browser biar kalian kaga males cari sendiri.\nInvit GOLE ke grup kalo butuh googling rame-rame.\n\nHow to use:\n[Search anything here][;?]\nExample:\nGoogle;?\n\nDeveloped by: \nBryan Khufa\nLinkedin\t: https://www.linkedin.com/in/bryan-khufa\nTwitter\t: https://twitter.com/BryanCoffeee");
+      }
     }
 
     else if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
@@ -171,7 +176,7 @@ function handleEvent(event) {
         rnd = Math.random();
         const annoy = ganggu(rnd);
         if (annoy) {
-          console.log(annoy);
+          // console.log(annoy);
           reply(replyToken, annoy);
         }
       }
