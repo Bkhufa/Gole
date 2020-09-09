@@ -145,8 +145,8 @@ function handleEvent(event) {
 
       (async () => {
         // const ddgResult = await getDdg(userQuestion);
-        const googleResult = await getGoogleSerpsbot(userQuestion);
-        // const googleResult = await getGoogleMarcelinhov(userQuestion);
+        const googleResult = await getGoogleMarcelinhov(userQuestion);
+        // const googleResult = await getGoogleSerpsbot(userQuestion);
         // const googleResult = await getGoogleApigeek(userQuestion);
         
         const answer = InterfaceAPI (googleResult, userQuestion);
@@ -312,7 +312,7 @@ async function getGoogleSerpsbot(userQuestion) {
     }
   }).then(res => {
     const result = JSON.parse(res.body);
-    const searchResult = result.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
+    const searchResult = result.data.results.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
 
     if (searchResult.length === 0) {
       return 0;
