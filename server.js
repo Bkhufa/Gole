@@ -124,10 +124,8 @@ function handleEvent(event) {
       let userQuestion = userText.split(cmdOld)[0];
 
       (async () => {
-        // const ddgResult = await getDdg(userQuestion);
-        const googleResult = await getGoogleMarcelinhov(userQuestion);
-        console.log(googleResult);
-        const answer = InterfaceAPI (googleResult, userQuestion);
+        const answer = await getDdg(userQuestion);
+        // const answer = InterfaceAPI (googleResult, userQuestion);
 
         reply(replyToken, answer);
         writeChatHistory(
@@ -147,8 +145,10 @@ function handleEvent(event) {
 
       (async () => {
         // const ddgResult = await getDdg(userQuestion);
-        const googleResult = await getGoogleApigeek(userQuestion);
-        // console.log(googleResult);
+        const googleResult = await getGoogleSerpsbot(userQuestion);
+        // const googleResult = await getGoogleMarcelinhov(userQuestion);
+        // const googleResult = await getGoogleApigeek(userQuestion);
+        
         const answer = InterfaceAPI (googleResult, userQuestion);
 
         reply(replyToken, answer);
@@ -288,7 +288,7 @@ function InterfaceAPI (response, userQuestion) {
     return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${userQuestion}`;
   }
   else {
-    var answer = `${userQuestion}\n`;
+    var answer = `${userQuestion.replace(/%20+/g, " ")}\n`;
     const count = response.length > 3 ? 3: response.length;
   
     for (let i = 0; i < count; i++) {
@@ -297,6 +297,32 @@ function InterfaceAPI (response, userQuestion) {
     
     return answer;
   }
+}
+
+
+async function getGoogleSerpsbot(userQuestion) {
+  const hl = "en-ID"; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
+  const gl = "id"; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
+
+  return got(`https://google-search5.p.rapidapi.com/google-serps/?q=${userQuestion}&gl=${gl}&hl=${hl}`, {
+    headers: {
+      "x-rapidapi-host" : process.env.rapidapi_hostS,
+      "x-rapidapi-key"  : process.env.rapidapi_key,
+      "useQueryString"  : true
+    }
+  }).then(res => {
+    const result = JSON.parse(res.body);
+    const searchResult = result.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
+
+    if (searchResult.length === 0) {
+      return 0;
+    }
+
+    return searchResult;
+
+  }).catch(error => {
+    return console.error(error);
+  });
 }
 
 async function getGoogleMarcelinhov(userQuestion) {
@@ -313,9 +339,10 @@ async function getGoogleMarcelinhov(userQuestion) {
     const result = JSON.parse(res.body);
     const searchResult = result.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
 
-    if (searchResult.results.length === 0) {
+    if (searchResult.length === 0) {
       return 0;
     }
+
     return searchResult;
 
   }).catch(error => {
@@ -335,6 +362,7 @@ async function getGoogleApigeek(userQuestion) {
     if (searchResult.results.length === 0) {
       return 0;
     }
+
     return searchResult.results;
 
   }).catch(error => {
