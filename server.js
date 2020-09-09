@@ -16,12 +16,13 @@ const serviceAccount = {
 };
 
 const admin = require("firebase-admin");
-// admin.initializeApp(functions.config().firebase)
+// admin.initializeApp(functions.config().firebase);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: process.env.DATABASE_URL
 });
 const database = admin.database();
+const db = admin.firestore();
 
 const {
   Client,
@@ -82,7 +83,7 @@ const annoyance = [
   { chance: 9, type: "Berisik ah" },
   { chance: 8, type: "MAN ROBBUKA?!!?" },
 ];
-const globalChance = 5 / 100;
+const globalChance = 2 / 100;
 
 function ganggu(rnd) {
   // const rnd = Math.random();
@@ -141,24 +142,20 @@ function handleEvent(event) {
     }
 
     if (userText.slice(-2) === cmdSearch) {
-      const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20");
+      const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20").toUpperCase();
 
       (async () => {
         // const ddgResult = await getDdg(userQuestion);
-        const googleResult = await getGoogleMarcelinhov(userQuestion);
+        const googleResult = await getSearchHistory(userQuestion);
+        // const googleResult = await getGoogleMarcelinhov(userQuestion);  // Array of obj
         // const googleResult = await getGoogleSerpsbot(userQuestion);
         // const googleResult = await getGoogleApigeek(userQuestion);
-        
-        const answer = InterfaceAPI (googleResult, userQuestion);
 
+        const answer = InterfaceAPI(googleResult, userQuestion);       // String
+
+        await writeSearchHistory(userQuestion, googleResult);
         reply(replyToken, answer);
-        writeChatHistory(
-          replyToken,
-          userId,
-          userQuestion,
-          timestamp,
-          answer
-        );
+
       })().catch(error => {
         return console.error(error);
       });
@@ -187,6 +184,19 @@ function handleEvent(event) {
   return;
 }
 
+function contains(target, pattern) {
+  var value = 0;
+  pattern.forEach(function (word) {
+    value = value + target.includes(word);
+  });
+  return (value === 1);
+}
+
+function randomRude(replyToken, misuh) {
+  var randomArr = Math.floor(Math.random() * misuh.length);
+  reply(replyToken, misuh[randomArr]);
+}
+
 function reply(replyToken, replyText) {
   const message = {
     type: "text",
@@ -195,6 +205,14 @@ function reply(replyToken, replyText) {
 
   client.replyMessage(replyToken, message).catch(err => {
     console.error(err);
+  });
+}
+
+function writeGroupJoin(groupId, type, timestamp) {
+  timestamp = timestamp.toString();
+  database.ref("group-list/" + groupId).set({
+    timestamp: timestamp,
+    type: type
   });
 }
 
@@ -213,33 +231,29 @@ function writeChatHistory(
     replyToken: replyToken,
     answer: searchResult
   });
-
-  // firestore.collection("chat-history").set({
-  //     "userId": userId,
-  //     "message": userText,
-  //     "timestamp": timestamp
-  // });
 }
 
-function writeGroupJoin(groupId, type, timestamp) {
-  timestamp = timestamp.toString();
-  database.ref("group-list/" + groupId).set({
-    timestamp: timestamp,
-    type: type
-  });
+async function writeSearchHistory(userQuestion, record) {
+  const FieldValue = admin.firestore.FieldValue;
+
+  const data = {
+    lastUpdated: FieldValue.serverTimestamp(),
+    results: record
+  };
+
+  const res = await db.collection('search-history').doc(userQuestion.toUpperCase()).set(data);
 }
 
-function contains(target, pattern) {
-  var value = 0;
-  pattern.forEach(function (word) {
-    value = value + target.includes(word);
-  });
-  return (value === 1);
-}
-
-function randomRude(replyToken, misuh) {
-  var randomArr = Math.floor(Math.random() * misuh.length);
-  reply(replyToken, misuh[randomArr]);
+async function getSearchHistory(userQuestion) {
+  const ref = db.collection('search-history').doc(userQuestion);
+  const doc = await ref.get().catch(error => (console.error("firebase fail", error)));
+  if (!doc.exists) {
+    console.error("GA NEMU");
+    return getGoogleMarcelinhov(userQuestion);
+  } else {
+    console.log("NEMU");
+    return doc.data().results;
+  }
 }
 
 async function getDdg(userQuestion) {
@@ -283,18 +297,18 @@ async function getDdg(userQuestion) {
     });
 }
 
-function InterfaceAPI (response, userQuestion) {
+function InterfaceAPI(response, userQuestion) {
   if (response === 0) {
     return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${userQuestion}`;
   }
   else {
     var answer = `${userQuestion.replace(/%20+/g, " ")}\n`;
-    const count = response.length > 3 ? 3: response.length;
-  
+    const count = response.length > 3 ? 3 : response.length;
+
     for (let i = 0; i < count; i++) {
-      answer += `${i+1}. ${response[i].title}\n${response[i].description}\n${response[i].link}\n\n`;
+      answer += `${i + 1}. ${response[i].title}\n${response[i].description}\n${response[i].link}\n\n`;
     }
-    
+
     return answer;
   }
 }
@@ -304,11 +318,11 @@ async function getGoogleSerpsbot(userQuestion) {
   const hl = "en-ID"; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
   const gl = "id"; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
 
-  return got(`https://google-search5.p.rapidapi.com/google-serps/?q=${userQuestion}&gl=${gl}&hl=${hl}`, {
+  return got(`https://google-search5.p.rapidapi.com/google-serps/?q=${userQuestion}&gl=${gl}&hl=${hl}&num=5`, {
     headers: {
-      "x-rapidapi-host" : process.env.rapidapi_hostS,
-      "x-rapidapi-key"  : process.env.rapidapi_key,
-      "useQueryString"  : true
+      "x-rapidapi-host": process.env.rapidapi_hostS,
+      "x-rapidapi-key": process.env.rapidapi_key,
+      "useQueryString": true
     }
   }).then(res => {
     const result = JSON.parse(res.body);
@@ -321,7 +335,8 @@ async function getGoogleSerpsbot(userQuestion) {
     return searchResult;
 
   }).catch(error => {
-    return console.error(error);
+    console.error("Serpsbot", error);
+    return getGoogleApigeek(userQuestion);
   });
 }
 
@@ -329,11 +344,11 @@ async function getGoogleMarcelinhov(userQuestion) {
   const hl = "en"; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
   const gl = "id"; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
 
-  return got(`https://google-search1.p.rapidapi.com/google-search?q=${userQuestion}&hl=${hl}&gl=${gl}`, {
+  return got(`https://google-search1.p.rapidapi.com/google-search?q=${userQuestion}&hl=${hl}&gl=${gl}&num=5`, {
     headers: {
-      "x-rapidapi-host" : process.env.rapidapi_hostM,
-      "x-rapidapi-key"  : process.env.rapidapi_key,
-      "useQueryString"  : true
+      "x-rapidapi-host": process.env.rapidapi_hostM,
+      "x-rapidapi-key": process.env.rapidapi_key,
+      "useQueryString": true
     }
   }).then(res => {
     const result = JSON.parse(res.body);
@@ -346,16 +361,17 @@ async function getGoogleMarcelinhov(userQuestion) {
     return searchResult;
 
   }).catch(error => {
-    return console.error(error);
+    console.error("Marcelinhov", error);
+    return getGoogleSerpsbot(userQuestion);
   });
 }
 
 async function getGoogleApigeek(userQuestion) {
   return got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${userQuestion}&num=5&lr=lang_en`, {
     headers: {
-      "x-rapidapi-host" : process.env.rapidapi_hostA,
-      "x-rapidapi-key"  : process.env.rapidapi_key,
-      "useQueryString"  : true
+      "x-rapidapi-host": process.env.rapidapi_hostA,
+      "x-rapidapi-key": process.env.rapidapi_key,
+      "useQueryString": true
     }
   }).then(res => {
     const searchResult = JSON.parse(res.body);
@@ -366,6 +382,7 @@ async function getGoogleApigeek(userQuestion) {
     return searchResult.results;
 
   }).catch(error => {
+    console.error("APIGEEK", error);
     return console.error(error);
   });
 }
