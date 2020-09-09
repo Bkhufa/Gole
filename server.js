@@ -284,40 +284,47 @@ async function getDdg(userQuestion) {
 }
 
 function InterfaceAPI (response, userQuestion) {
-  var answer = `${userQuestion}\n`;
-  const count = response.length > 3 ? 3: response.length;
-
-  for (let i = 0; i < count; i++) {
-    answer += `${i+1}. ${response[i].title}\n${response[i].description}\n${response[i].link}\n\n`;
+  if (response === 0) {
+    return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${userQuestion}`;
   }
+  else {
+    var answer = `${userQuestion}\n`;
+    const count = response.length > 3 ? 3: response.length;
   
-  return answer;
+    for (let i = 0; i < count; i++) {
+      answer += `${i+1}. ${response[i].title}\n${response[i].description}\n${response[i].link}\n\n`;
+    }
+    
+    return answer;
+  }
 }
 
 async function getGoogleMarcelinhov(userQuestion) {
-  const hl = en; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
-  const gl = id; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
+  const hl = "en"; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
+  const gl = "id"; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
 
-  return got(`https://google-search1.p.rapidapi.com/google-search?q=${searchQuery}&hl=${hl}&gl=${gl}`, {
+  return got(`https://google-search1.p.rapidapi.com/google-search?q=${userQuestion}&hl=${hl}&gl=${gl}`, {
     headers: {
       "x-rapidapi-host" : process.env.rapidapi_hostM,
       "x-rapidapi-key"  : process.env.rapidapi_key,
       "useQueryString"  : true
     }
   }).then(res => {
-    const searchResult = JSON.parse(res.body);
+    const result = JSON.parse(res.body);
+    const searchResult = result.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
+
     if (searchResult.results.length === 0) {
-      return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${searchQuery}`;
+      return 0;
     }
-    
-    return searchResult.results;
+    return searchResult;
+
   }).catch(error => {
     return console.error(error);
   });
 }
 
 async function getGoogleApigeek(userQuestion) {
-  return got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${searchQuery}&num=5&lr=lang_en`, {
+  return got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${userQuestion}&num=5&lr=lang_en`, {
     headers: {
       "x-rapidapi-host" : process.env.rapidapi_hostA,
       "x-rapidapi-key"  : process.env.rapidapi_key,
@@ -326,10 +333,10 @@ async function getGoogleApigeek(userQuestion) {
   }).then(res => {
     const searchResult = JSON.parse(res.body);
     if (searchResult.results.length === 0) {
-      return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${searchQuery}`;
+      return 0;
     }
-    
     return searchResult.results;
+
   }).catch(error => {
     return console.error(error);
   });
