@@ -118,24 +118,6 @@ function handleEvent(event) {
   if (event.type === "message" && event.message.type === "text") {
     userText = event.message.text;
 
-    if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
-      var rnd = Math.random();
-      console.warn(rnd);
-
-      if (globalChance > rnd) {
-        rnd = Math.random();
-        const annoy = ganggu(rnd);
-        if (annoy) {
-          console.log(annoy);
-          reply(replyToken, annoy);
-        }
-      }
-
-      if (contains(userText.toLowerCase(), bannedWords)) {
-        randomRude(replyToken, reminder);
-      }
-    }
-
     if (userText.slice(-2) === cmdOld) {
       // reply(replyToken, "We are changing the command to ;?");
       // reply(replyToken, "Sorry we are currently in maintenance");
@@ -181,6 +163,25 @@ function handleEvent(event) {
         return console.error(error);
       });
     }
+
+    else if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
+      var rnd = Math.random();
+      console.warn(rnd);
+
+      if (globalChance > rnd) {
+        rnd = Math.random();
+        const annoy = ganggu(rnd);
+        if (annoy) {
+          console.log(annoy);
+          reply(replyToken, annoy);
+        }
+      }
+
+      if (contains(userText.toLowerCase(), bannedWords)) {
+        randomRude(replyToken, reminder);
+      }
+    }
+
   }
   // return response.status(200).send(request.method);
   return;
