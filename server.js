@@ -82,7 +82,7 @@ const annoyance = [
   { chance: 9, type: "Berisik ah" },
   { chance: 8, type: "MAN ROBBUKA?!!?" },
 ];
-const globalChance = 10 / 100;
+const globalChance = 5 / 100;
 
 function ganggu(rnd) {
   // const rnd = Math.random();
@@ -138,23 +138,44 @@ function handleEvent(event) {
 
     if (userText.slice(-2) === cmdOld) {
       // reply(replyToken, "We are changing the command to ;?");
-      reply(replyToken, "Sorry we are currently in maintenance");
-    }
-
-    if (userText.slice(-2) === cmdSearch) {
-      let userQuestion = userText.split(cmdSearch)[0];
+      // reply(replyToken, "Sorry we are currently in maintenance");
+      let userQuestion = userText.split(cmdOld)[0];
 
       (async () => {
         // const ddgResult = await getDdg(userQuestion);
-        const googleResult1 = await getGoogleApigeek(userQuestion);
+        const googleResult = await getGoogleMarcelinhov(userQuestion);
+        console.log(googleResult);
+        const answer = InterfaceAPI (googleResult, userQuestion);
 
-        reply(replyToken, googleResult1);
+        reply(replyToken, answer);
         writeChatHistory(
           replyToken,
           userId,
           userQuestion,
           timestamp,
-          googleResult1
+          answer
+        );
+      })().catch(error => {
+        return console.error(error);
+      });
+    }
+
+    if (userText.slice(-2) === cmdSearch) {
+      const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20");
+
+      (async () => {
+        // const ddgResult = await getDdg(userQuestion);
+        const googleResult = await getGoogleApigeek(userQuestion);
+        // console.log(googleResult);
+        const answer = InterfaceAPI (googleResult, userQuestion);
+
+        reply(replyToken, answer);
+        writeChatHistory(
+          replyToken,
+          userId,
+          userQuestion,
+          timestamp,
+          answer
         );
       })().catch(error => {
         return console.error(error);
@@ -261,17 +282,51 @@ async function getDdg(userQuestion) {
     });
 }
 
-async function getGoogleApigeek(userQuestion) {
-  const searchQuery = userQuestion.replace(/\s+/g, "%20");
-  return got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${searchQuery}&num=5&lr=lang_en`, {
+function InterfaceAPI (response, userQuestion) {
+  var answer = `${userQuestion}\n`;
+  const count = response.length > 3 ? 3: response.length;
+
+  for (let i = 0; i < count; i++) {
+    answer += `${i+1}. ${response[i].title}\n${response[i].description}\n${response[i].link}\n\n`;
+  }
+  
+  return answer;
+}
+
+async function getGoogleMarcelinhov(userQuestion) {
+  const hl = en; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
+  const gl = id; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
+
+  return got(`https://google-search1.p.rapidapi.com/google-search?q=${searchQuery}&hl=${hl}&gl=${gl}`, {
     headers: {
-      "x-rapidapi-host" : process.env.rapidapi_host1,
-      "x-rapidapi-key"  : process.env.rapidapi_key1,
+      "x-rapidapi-host" : process.env.rapidapi_hostM,
+      "x-rapidapi-key"  : process.env.rapidapi_key,
       "useQueryString"  : true
     }
   }).then(res => {
     const searchResult = JSON.parse(res.body);
-    console.log(searchResult.results);
+    if (searchResult.results.length === 0) {
+      return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${searchQuery}`;
+    }
+    
+    return searchResult.results;
+  }).catch(error => {
+    return console.error(error);
+  });
+}
+
+async function getGoogleApigeek(userQuestion) {
+  return got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${searchQuery}&num=5&lr=lang_en`, {
+    headers: {
+      "x-rapidapi-host" : process.env.rapidapi_hostA,
+      "x-rapidapi-key"  : process.env.rapidapi_key,
+      "useQueryString"  : true
+    }
+  }).then(res => {
+    const searchResult = JSON.parse(res.body);
+    if (searchResult.results.length === 0) {
+      return `Sorry we can't seem to find that, use this link to find it yourself:\n\nnhttps://www.google.com/search?q=${searchQuery}`;
+    }
     
     return searchResult.results;
   }).catch(error => {
