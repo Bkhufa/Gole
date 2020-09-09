@@ -145,20 +145,22 @@ function handleEvent(event) {
       const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20").toUpperCase();
 
       (async () => {
-        // const ddgResult = await getDdg(userQuestion);
-        const googleResult = await getSearchHistory(userQuestion);
-        // const googleResult = await getGoogleMarcelinhov(userQuestion);  // Array of obj
-        // const googleResult = await getGoogleSerpsbot(userQuestion);
-        // const googleResult = await getGoogleApigeek(userQuestion);
+        try {
+          // const ddgResult = await getDdg(userQuestion);
+          const googleResult = await getSearchHistory(userQuestion);
+          // const googleResult = await getGoogleMarcelinhov(userQuestion);  // Array of obj
+          // const googleResult = await getGoogleSerpsbot(userQuestion);
+          // const googleResult = await getGoogleApigeek(userQuestion);
 
-        const answer = InterfaceAPI(googleResult, userQuestion);       // String
+          const answer = InterfaceAPI(googleResult, userQuestion);       // String
 
-        await writeSearchHistory(userQuestion, googleResult);
-        reply(replyToken, answer);
+          // await writeSearchHistory(userQuestion, googleResult);
+          reply(replyToken, answer);
 
-      })().catch(error => {
-        return console.error(error);
-      });
+        } catch (error) {
+          return console.error("Reply Error", error);
+        }
+      })();
     }
 
     else if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
@@ -336,10 +338,11 @@ async function getGoogleSerpsbot(userQuestion) {
 
     await writeSearchHistory(userQuestion, searchResult);
     console.log("Result from Serpsbot");
+
     return searchResult;
 
   } catch (err) {
-    console.error("Serpsbot", err);
+    console.error("Serpsbot Error", err);
     return getGoogleApigeek(userQuestion);
   }
 }
@@ -348,13 +351,15 @@ async function getGoogleMarcelinhov(userQuestion) {
   const hl = "en"; //Parameter defines the language to use for the Google search. It's a two-letter language code. (e.g., en for English, es for Spanish, or fr for French) Head to the Google languages for a full list of supported Google languages.
   const gl = "id"; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
 
-  return got(`https://google-search1.p.rapidapi.com/google-search?q=${userQuestion}&hl=${hl}&gl=${gl}&num=5`, {
-    headers: {
-      "x-rapidapi-host": process.env.rapidapi_hostM,
-      "x-rapidapi-key": process.env.rapidapi_key,
-      "useQueryString": true
-    }
-  }).then(res => {
+  try {
+    const res = await got(`https://google-search1.p.rapidapi.com/google-search?q=${userQuestion}&hl=${hl}&gl=${gl}&num=5`, {
+      headers: {
+        "x-rapidapi-host": process.env.rapidapi_hostM,
+        "x-rapidapi-key": process.env.rapidapi_key,
+        "useQueryString": true
+      }
+    });
+
     const result = JSON.parse(res.body);
     const searchResult = result.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
 
@@ -362,33 +367,41 @@ async function getGoogleMarcelinhov(userQuestion) {
       return 0;
     }
 
-    // await writeSearchHistory(userQuestion, searchResult);
+    await writeSearchHistory(userQuestion, searchResult);
+    console.log("Result from Marcelinhov");
+
     return searchResult;
 
-  }).catch(error => {
-    console.error("Marcelinhov", error);
+  } catch (err) {
+    console.error("Marcelinhov Error", err);
     return getGoogleSerpsbot(userQuestion);
-  });
+  }
 }
 
 async function getGoogleApigeek(userQuestion) {
-  return got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${userQuestion}&num=5&lr=lang_en`, {
-    headers: {
-      "x-rapidapi-host": process.env.rapidapi_hostA,
-      "x-rapidapi-key": process.env.rapidapi_key,
-      "useQueryString": true
-    }
-  }).then(res => {
+  const gl = "id"; //Parameter defines the country to use for the Google search. It's a two-letter country code. (e.g., us for the United States, uk for United Kingdom, or fr for France) Head to the Google countries for a full list of supported Google countries.
+
+  try {
+    const res = await got(`https://google-search3.p.rapidapi.com/api/v1/search/q=${userQuestion}&num=5&lr=lang_en&gl=${gl}`, {
+      headers: {
+        "x-rapidapi-host": process.env.rapidapi_hostA,
+        "x-rapidapi-key": process.env.rapidapi_key,
+        "useQueryString": true
+      }
+    });
+
     const searchResult = JSON.parse(res.body);
     if (searchResult.results.length === 0) {
       return 0;
     }
 
-    // await writeSearchHistory(userQuestion, searchResult.results);
+    await writeSearchHistory(userQuestion, searchResult.results);
+    console.log("Result from Marcelinhov");
+
     return searchResult.results;
 
-  }).catch(error => {
-    console.error("APIGEEK", error);
-    return console.error(error);
-  });
+  } catch (err) {
+    console.error("Apigeek Error", err);
+    return 0;
+  }
 }
