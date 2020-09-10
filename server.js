@@ -83,7 +83,7 @@ const annoyance = [
   { chance: 9, type: "Berisik ah" },
   { chance: 8, type: "MAN ROBBUKA?!!?" },
 ];
-const globalChance = 2 / 100;
+const globalChance = 4 / 100;
 
 function ganggu(rnd) {
   // const rnd = Math.random();
@@ -98,7 +98,7 @@ function ganggu(rnd) {
 }
 
 function handleEvent(event) {
-  console.log(event);
+  // console.log(event);
   var userId = event.source.userId;
   var timestamp = event.timestamp;
   var replyToken = event.replyToken;
@@ -111,7 +111,7 @@ function handleEvent(event) {
 
   if (event.type === "join") {
     const type = event.source.type;
-    answer = "Thanks for inviting me... SIKE you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with ;?\n\ntry: Elon Musk;?";
+    answer = "Thanks for inviting me... Actually, nevermind, you should be the one thanking me for looking up on your stuffs.\n\nI will answer you if you ask a question ending with ;?\n\ntry: Elon Musk;?";
     reply(replyToken, answer);
     writeGroupJoin(groupId, type, timestamp);
   }
@@ -120,13 +120,12 @@ function handleEvent(event) {
     userText = event.message.text;
 
     if (userText.slice(-2) === cmdOld) {
-      // reply(replyToken, "We are changing the command to ;?");
-      // reply(replyToken, "Sorry we are currently in maintenance");
+      // reply(replyToken, "Sorry we are currently under maintenance");
+      reply(replyToken, "Try our new improved command ;?");
       let userQuestion = userText.split(cmdOld)[0];
 
       (async () => {
         const answer = await getDdg(userQuestion);
-        // const answer = InterfaceAPI (googleResult, userQuestion);
 
         reply(replyToken, answer);
         writeChatHistory(
@@ -142,7 +141,8 @@ function handleEvent(event) {
     }
 
     if (userText.slice(-2) === cmdSearch) {
-
+      // reply(replyToken, "Sorry we are currently under maintenance");
+      
       if (userText.length > 2) {
         const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20").toUpperCase();
 
@@ -164,6 +164,7 @@ function handleEvent(event) {
           }
         })();
       } else {
+        // reply(replyToken, "GOLE adala bot yang membantu kalian mencarikan sesuatu di google supaya kalian tida perlu ganti aplikasi atau buka browser biar kalian kaga males cari sendiri.\nInvit GOLE ke grup kalo butuh googling rame-rame.\n\nHow to use:\n[Search anything here][;?]\nExample:\nGoogle;?\n\nDeveloped by: \nBryan Khufa\nLinkedin\t: https://www.linkedin.com/in/bryan-khufa\nTwitter\t: https://twitter.com/BryanCoffeee");
         reply(replyToken, "GOLE adala bot yang membantu kalian mencarikan sesuatu di google supaya kalian tida perlu ganti aplikasi atau buka browser biar kalian kaga males cari sendiri.\nInvit GOLE ke grup kalo butuh googling rame-rame.\n\nHow to use:\n[Search anything here][;?]\nExample:\nGoogle;?\n\nDeveloped by: \nBryan Khufa\nLinkedin\t: https://www.linkedin.com/in/bryan-khufa\nTwitter\t: https://twitter.com/BryanCoffeee");
       }
     }
@@ -308,12 +309,15 @@ function InterfaceAPI(response, userQuestion) {
   if (response === 0) {
     return `Sorry we can't seem to find that, use this link to find it yourself:\n\nhttps://www.google.com/search?q=${userQuestion}`;
   }
+  if (response === 429) {
+    return `Sorry we are running out of our daily search quotas because things are expensive nowadays. Please try again tomorrow :(`
+  }
   else {
-    var answer = `${userQuestion.replace(/%20+/g, " ")}\n`;
+    var answer = `${userQuestion.replace(/%20+/g, " ")}`;
     const count = response.length > 3 ? 3 : response.length;
 
     for (let i = 0; i < count; i++) {
-      answer += `${i + 1}. ${response[i].title}\n${response[i].description}\n${response[i].link}\n\n`;
+      answer += `\n\n${i + 1}. ${response[i].title}\n${response[i].description}\n${response[i].link}`;
     }
 
     return answer;
@@ -407,6 +411,6 @@ async function getGoogleApigeek(userQuestion) {
 
   } catch (err) {
     console.error("Apigeek Error", err);
-    return 0;
+    return 429;
   }
 }
