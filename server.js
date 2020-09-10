@@ -121,20 +121,17 @@ function handleEvent(event) {
 
     if (userText.slice(-2) === cmdOld) {
       // reply(replyToken, "Sorry we are currently under maintenance");
-      reply(replyToken, "Try our new improved command ;?");
-      let userQuestion = userText.split(cmdOld)[0];
+
 
       (async () => {
-        const answer = await getDdg(userQuestion);
+        await reply(replyToken, "Try our new improved command ;?");
+        
+//         let userQuestion = userText.split(cmdOld)[0];
+//         const answer = await getDdg(userQuestion);
+//         console.log(typeof answer, answer);
 
-        reply(replyToken, answer);
-        writeChatHistory(
-          replyToken,
-          userId,
-          userQuestion,
-          timestamp,
-          answer
-        );
+//         await reply(replyToken, answer);
+
       })().catch(error => {
         return console.error(error);
       });
@@ -142,13 +139,14 @@ function handleEvent(event) {
 
     if (userText.slice(-2) === cmdSearch) {
       // reply(replyToken, "Sorry we are currently under maintenance");
-      
+
       if (userText.length > 2) {
         const userQuestion = userText.split(cmdSearch)[0].replace(/\s+/g, "%20").toUpperCase();
 
         (async () => {
           try {
             // const ddgResult = await getDdg(userQuestion);
+
             const googleResult = await getSearchHistory(userQuestion);
             // const googleResult = await getGoogleMarcelinhov(userQuestion);  // Array of obj
             // const googleResult = await getGoogleSerpsbot(userQuestion);
@@ -205,13 +203,13 @@ function randomRude(replyToken, misuh) {
   reply(replyToken, misuh[randomArr]);
 }
 
-function reply(replyToken, replyText) {
+async function reply(replyToken, replyText) {
   const message = {
     type: "text",
     text: replyText
   };
 
-  client.replyMessage(replyToken, message).catch(err => {
+  await client.replyMessage(replyToken, message).catch(err => {
     console.error(err);
   });
 }
@@ -221,23 +219,6 @@ function writeGroupJoin(groupId, type, timestamp) {
   database.ref("group-list/" + groupId).set({
     timestamp: timestamp,
     type: type
-  });
-}
-
-function writeChatHistory(
-  replyToken,
-  userId,
-  userQuestion,
-  timestamp,
-  searchResult
-) {
-  timestamp = timestamp.toString();
-
-  database.ref("search-history/" + userQuestion).set({
-    userId: userId,
-    timestamp: timestamp,
-    replyToken: replyToken,
-    answer: searchResult
   });
 }
 
