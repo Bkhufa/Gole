@@ -71,26 +71,28 @@ app.use((err, req, res, next) => {
 });
 
 const bannedWords = ["kudet", "qdet"];
-const reminder = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "Kamu lebih baik diam"];
+const reminder = ["Mon maap itu tida sopan hehe", "Ssstt", "Jangan diulangi lagi ya", "Kamu lebih baik diam", "Bacod", "Inget mati woy", "Istighfar bang", "kUdET"];
 const annoyance = [
-  { chance: 15, type: "Anjayy" },
-  { chance: 15, type: "Parahh" },
-  { chance: 13, type: "Gatauu" },
-  { chance: 12, type: "Ohh gitu" },
+  { chance: 11, type: "Anjayy" },
+  { chance: 11, type: "Parahh" },
+  { chance: 12, type: "Gatauu" },
+  { chance: 11, type: "Ohh gitu" },
+  { chance: 11, type: "Mau nangis :(" },
   { chance: 10, type: "Yaudah iya" },
+  { chance: 10, type: "Aku cape" },
   { chance: 9, type: "Hilih" },
-  { chance: 9, type: "Aku cape" },
   { chance: 9, type: "Berisik ah" },
-  { chance: 8, type: "MAN ROBBUKA?!!?" },
+  { chance: 6, type: "MAN ROBBUKA?!!?" },
 ];
-const globalChance = 4 / 100;
+const globalChance = 2.5 / 100;
+const bannedWord = /k*q*\w{0,3}u+\w{0,3}d+\w{0,3}e*\w{0,3}t+\w{0,3}/g;
 
 function ganggu(rnd) {
   // const rnd = Math.random();
   var acc = 0;
   for (var i = 0, r; (r = annoyance[i]); i++) {
     acc += r.chance / 100;
-    // console.log(acc, rnd);
+    console.log(acc, rnd);
     if (rnd < acc) return r.type;
   }
   console.warn(acc, rnd);
@@ -124,13 +126,12 @@ function handleEvent(event) {
 
 
       (async () => {
-        await reply(replyToken, "Try our new improved command ;?");
-        
-//         let userQuestion = userText.split(cmdOld)[0];
-//         const answer = await getDdg(userQuestion);
-//         console.log(typeof answer, answer);
+            await reply(replyToken, "Try our new improved command ;?");
+        let userQuestion = userText.split(cmdOld)[0];
+        const answer = await getDdg(userQuestion);
+        console.log(typeof answer, answer);
 
-//         await reply(replyToken, answer);
+        reply(replyToken, answer);
 
       })().catch(error => {
         return console.error(error);
@@ -170,18 +171,18 @@ function handleEvent(event) {
     else if (groupId === 'C939ec88d1fa050eaa8882ca764340ca0') {
       var rnd = Math.random();
       console.warn(rnd);
+      
+      if(bannedWord.test(userText)){
+        randomRude(replyToken, reminder);
+      }
 
-      if (globalChance > rnd) {
+      else if (globalChance > rnd) {
         rnd = Math.random();
         const annoy = ganggu(rnd);
         if (annoy) {
           // console.log(annoy);
           reply(replyToken, annoy);
         }
-      }
-
-      if (contains(userText.toLowerCase(), bannedWords)) {
-        randomRude(replyToken, reminder);
       }
     }
 
@@ -238,7 +239,7 @@ async function getSearchHistory(userQuestion) {
   const doc = await ref.get().catch(error => (console.error("firebase fail", error)));
   if (!doc.exists) {
     console.error("GA NEMU");
-    return getGoogleMarcelinhov(userQuestion);
+    return getGoogleSerpsbot(userQuestion);
   } else {
     console.log("NEMU");
     return doc.data().results;
@@ -323,17 +324,17 @@ async function getGoogleSerpsbot(userQuestion) {
     const searchResult = result.data.results.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
 
     if (searchResult.length === 0) {
-      return 0;
+      return getGoogleMarcelinhov(userQuestion);
     }
 
-    await writeSearchHistory(userQuestion, searchResult);
+    writeSearchHistory(userQuestion, searchResult);
     console.log("Result from Serpsbot");
 
     return searchResult;
 
   } catch (err) {
     console.error("Serpsbot Error", err);
-    return getGoogleApigeek(userQuestion);
+    return getGoogleMarcelinhov(userQuestion);
   }
 }
 
@@ -354,17 +355,17 @@ async function getGoogleMarcelinhov(userQuestion) {
     const searchResult = result.organic.map(({ title, snippet: description, url: link }) => ({ title, description, link }));
 
     if (searchResult.length === 0) {
-      return 0;
+      return getGoogleApigeek(userQuestion);
     }
 
-    await writeSearchHistory(userQuestion, searchResult);
+    writeSearchHistory(userQuestion, searchResult);
     console.log("Result from Marcelinhov");
 
     return searchResult;
 
   } catch (err) {
     console.error("Marcelinhov Error", err);
-    return getGoogleSerpsbot(userQuestion);
+    return getGoogleApigeek(userQuestion);
   }
 }
 
@@ -385,7 +386,7 @@ async function getGoogleApigeek(userQuestion) {
       return 0;
     }
 
-    await writeSearchHistory(userQuestion, searchResult.results);
+    writeSearchHistory(userQuestion, searchResult.results);
     console.log("Result from Marcelinhov");
 
     return searchResult.results;
