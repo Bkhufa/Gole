@@ -1,6 +1,3 @@
-import { randomRude, ganggu } from "./src/random";
-import { reminder, globalChance, bannedWord } from "./src/constant";
-
 const express = require("express");
 const app = express();
 const got = require("got");
@@ -73,6 +70,44 @@ app.use((err, req, res, next) => {
   }
   next(err); // will throw default 500
 });
+
+const bannedWords = ["kudet", "qdet"];
+const reminder = [
+  "Mon maap itu tida sopan hehe",
+  "Ssstt",
+  "Jangan diulangi lagi ya",
+  "Kamu lebih baik diam",
+  "Bacod",
+  "Inget mati woy",
+  "Istighfar bang",
+  "kUdET",
+];
+const annoyance = [
+  { chance: 11, type: "Anjayy" },
+  { chance: 11, type: "Parahh" },
+  { chance: 12, type: "Gatauu" },
+  { chance: 11, type: "Ohh gitu" },
+  { chance: 11, type: "Mau nangis :(" },
+  { chance: 10, type: "Yaudah iya" },
+  { chance: 10, type: "Aku cape" },
+  { chance: 9, type: "Hilih" },
+  { chance: 9, type: "Berisik ah" },
+  { chance: 6, type: "MAN ROBBUKA?!!?" },
+];
+const globalChance = 2.5 / 100;
+const bannedWord = /(k|q|c)+.*d+\w*e*\w*(t|d)+\w*/gi;
+
+function ganggu(rnd) {
+  // const rnd = Math.random();
+  var acc = 0;
+  for (var i = 0, r; (r = annoyance[i]); i++) {
+    acc += r.chance / 100;
+    console.log(acc, rnd);
+    if (rnd < acc) return r.type;
+  }
+  console.warn(acc, rnd);
+  return;
+}
 
 function handleEvent(event) {
   // console.log(event);
@@ -173,6 +208,11 @@ function contains(target, pattern) {
     value = value + target.includes(word);
   });
   return value === 1;
+}
+
+function randomRude(replyToken, misuh) {
+  var randomArr = Math.floor(Math.random() * misuh.length);
+  reply(replyToken, misuh[randomArr]);
 }
 
 async function reply(replyToken, replyText) {
