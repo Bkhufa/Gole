@@ -1,4 +1,4 @@
-# Gole Bot
+# Gole ChatBot
 
 Bringing search engine to your group chat so you don't need to open your another apps. Powered by 3 Google Search APIs.
 
