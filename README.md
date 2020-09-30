@@ -1,7 +1,7 @@
 # Gole Bot
 
-Bringing search engine to your group chat so you don't need to open your browser. Powered by 3 Google Search APIs.
+Bringing search engine to your group chat so you don't need to open your browser. Powered by DuckDuckGo Instant Answer API
 
 Platform: LINE
 
-Version : 2.0
+Version : 1.5

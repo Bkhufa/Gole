@@ -184,12 +184,11 @@ function handleEvent(event) {
       var rnd = Math.random();
       console.warn(rnd);
 
-      // if (userId === "Ue8a704bfc9b99db3cfa892a14ac2d737") {
-      //   if (bannedWord.test(userText)) {
-      //     randomRude(replyToken, reminder);
-      //   }
-      // } else 
-      if (globalChance > rnd) {
+      if (userId === "Ue8a704bfc9b99db3cfa892a14ac2d737") {
+        if (bannedWord.test(userText)) {
+          randomRude(replyToken, reminder);
+        }
+      } else if (globalChance > rnd) {
         rnd = Math.random();
         const annoy = ganggu(rnd);
         if (annoy) {
